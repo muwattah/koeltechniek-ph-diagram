@@ -32,10 +32,9 @@
 <body>
   <div class="container">
     <h1>Log p-h Diagram Tool</h1>
-    <p class="subtitle">Interactieve koelcyclus voor R-513A, R-134a en meer • GitHub Pages</p>
+    <p class="subtitle">Interactieve koelcyclus met isothermen & isentropen • R-513A / R-134a</p>
 
     <div class="grid">
-      <!-- Inputs -->
       <div class="card">
         <h2 style="margin-bottom:16px;color:#38bdf8;">Invoer</h2>
 
@@ -59,26 +58,27 @@
         <label>Onderkoeling / Subcooling (K)</label>
         <input type="number" id="subcooling" value="5" step="1" min="0">
 
-        <label>Isentropisch rendement compressor (0.6 – 1.0)</label>
+        <label>Isentropisch rendement compressor</label>
         <input type="number" id="eta" value="0.70" step="0.05" min="0.5" max="1">
 
         <button onclick="bereken()">Teken cyclus + Bereken COP</button>
 
         <div class="note">
-          Tip: Vul de waarden in en klik op de knop.<br>
-          De grafiek en berekeningen worden direct bijgewerkt.
+          Nu met echte bochten van de dampkoepel,<br>
+          isothermen (temperatuurlijnen) en<br>
+          isentropen (scheve lijnen in oververhit gebied).
         </div>
       </div>
 
-      <!-- Diagram + Results -->
       <div>
         <div class="card">
-          <canvas id="phCanvas" width="800" height="520"></canvas>
+          <canvas id="phCanvas" width="820" height="560"></canvas>
           <div class="legend">
             <span><div class="dot" style="background:#38bdf8"></div> Verzadigde vloeistof</span>
             <span><div class="dot" style="background:#f472b6"></div> Verzadigde damp</span>
+            <span><div class="dot" style="background:#a78bfa"></div> Isothermen (°C)</span>
+            <span><div class="dot" style="background:#fbbf24"></div> Isentropen</span>
             <span><div class="dot" style="background:#4ade80"></div> Cyclus</span>
-            <span><div class="dot" style="background:#fbbf24"></div> Punten 1-2-3-4</span>
           </div>
         </div>
 
@@ -87,16 +87,16 @@
           <div class="cop" id="copValue">COP = —</div>
           <table>
             <tr><th>Punt</th><th>Beschrijving</th><th>h (kJ/kg)</th></tr>
-            <tr><td>1</td><td>Uitgang verdamper (aanzuiging)</td><td id="h1">—</td></tr>
+            <tr><td>1</td><td>Uitgang verdamper</td><td id="h1">—</td></tr>
             <tr><td>2</td><td>Uitgang compressor</td><td id="h2">—</td></tr>
-            <tr><td>3</td><td>Uitgang condensor (vloeistof)</td><td id="h3">—</td></tr>
-            <tr><td>4</td><td>Na expansieventiel</td><td id="h4">—</td></tr>
+            <tr><td>3</td><td>Uitgang condensor</td><td id="h3">—</td></tr>
+            <tr><td>4</td><td>Na expansie</td><td id="h4">—</td></tr>
           </table>
           <table style="margin-top:12px;">
             <tr><th>Grootheid</th><th>Waarde</th></tr>
             <tr><td>Specifiek koelvermogen q₀</td><td id="q0">—</td></tr>
             <tr><td>Specifieke compressorarbeid w</td><td id="w">—</td></tr>
-            <tr><td>Drukverhouding (approx)</td><td id="pr">—</td></tr>
+            <tr><td>Drukverhouding</td><td id="pr">—</td></tr>
           </table>
         </div>
       </div>
@@ -104,12 +104,11 @@
   </div>
 
   <script>
-    // === Eenvoudige verzadigingsdata (benadering op basis van echte tabellen) ===
-    // Voor R-513A en R-134a vrij nauwkeurig in het normale bereik
+    // Uitgebreidere tabellen voor mooiere bochten
     const data = {
       R513A: {
-        // T in °C -> {P_bar, hf, hg}
         table: [
+          [-50, 0.37, 138, 344],
           [-40, 0.62, 150, 350],
           [-30, 0.99, 162, 357],
           [-20, 1.53, 174, 363],
@@ -119,11 +118,13 @@
           [20, 6.17, 227, 388],
           [30, 8.21, 241, 393],
           [40, 10.73, 256, 398],
-          [50, 13.78, 271, 402]
+          [50, 13.78, 271, 402],
+          [60, 17.44, 287, 406]
         ]
       },
       R134a: {
         table: [
+          [-50, 0.29, 122, 367],
           [-40, 0.51, 137, 372],
           [-30, 0.84, 151, 379],
           [-20, 1.33, 167, 386],
@@ -133,10 +134,11 @@
           [20, 5.72, 236, 409],
           [30, 7.70, 254, 414],
           [40, 10.17, 274, 419],
-          [50, 13.18, 294, 422]
+          [50, 13.18, 294, 422],
+          [60, 16.82, 315, 424]
         ]
       },
-      R410A: { // grove benadering
+      R410A: {
         table: [
           [-40, 1.8, 140, 400],
           [-20, 4.0, 170, 415],
@@ -157,10 +159,8 @@
     };
 
     function interp(table, T) {
-      // Lineaire interpolatie
       if (T <= table[0][0]) return {P: table[0][1], hf: table[0][2], hg: table[0][3]};
       if (T >= table[table.length-1][0]) return {P: table[table.length-1][1], hf: table[table.length-1][2], hg: table[table.length-1][3]};
-
       for (let i = 0; i < table.length-1; i++) {
         const t1 = table[i][0], t2 = table[i+1][0];
         if (T >= t1 && T <= t2) {
@@ -183,35 +183,23 @@
       const eta = parseFloat(document.getElementById('eta').value);
 
       const tab = data[ref].table;
-
-      // Verzadigingswaarden
       const evap = interp(tab, Te);
       const cond = interp(tab, Tc);
 
-      // Punt 1: verzadigde damp + oververhitting (eenvoudige benadering + cp≈1.0)
-      let h1 = evap.hg + SH * 1.0;   // kJ/kg (cp damp ≈ 1 kJ/kgK)
-
-      // Punt 3: verzadigde vloeistof - onderkoeling (cp≈1.4)
+      let h1 = evap.hg + SH * 1.05;
       let h3 = cond.hf - SC * 1.4;
-
-      // Punt 4 = h3 (isenthalpische expansie)
       let h4 = h3;
 
-      // Ideale isentropische compressie (zeer grove benadering)
-      // We gebruiken een simpele schatting van h2s
-      const deltaT_comp = (Tc - Te) * 1.3; // grove schatting
-      let h2s = h1 + deltaT_comp * 0.9;
-
-      // Reële compressie
+      // Betere schatting voor compressie
+      const deltaT = (Tc - Te);
+      let h2s = h1 + (deltaT * 0.85 + 15);
       let h2 = h1 + (h2s - h1) / eta;
 
-      // Resultaten
       const q0 = h1 - h4;
       const w  = h2 - h1;
       const COP = q0 / w;
       const PR = cond.P / evap.P;
 
-      // Weergeven
       document.getElementById('resultsCard').style.display = 'block';
       document.getElementById('copValue').textContent = `COP = ${COP.toFixed(2)}`;
       document.getElementById('h1').textContent = h1.toFixed(1);
@@ -222,11 +210,10 @@
       document.getElementById('w').textContent  = w.toFixed(1) + ' kJ/kg';
       document.getElementById('pr').textContent  = PR.toFixed(2);
 
-      // Teken diagram
-      tekenDiagram(tab, Te, Tc, h1, h2, h3, h4, evap.P, cond.P);
+      tekenDiagram(tab, Te, Tc, h1, h2, h3, h4, evap.P, cond.P, ref);
     }
 
-    function tekenDiagram(table, Te, Tc, h1, h2, h3, h4, Pe, Pc) {
+    function tekenDiagram(table, Te, Tc, h1, h2, h3, h4, Pe, Pc, ref) {
       const canvas = document.getElementById('phCanvas');
       const ctx = canvas.getContext('2d');
       const W = canvas.width;
@@ -234,29 +221,81 @@
 
       ctx.clearRect(0, 0, W, H);
 
-      // Assen bereik
-      const hMin = 100, hMax = 480;
-      const pMin = 0.3, pMax = 30; // log
+      const hMin = 100, hMax = 500;
+      const pMin = 0.25, pMax = 40;
 
-      function x(h) { return 60 + (h - hMin) / (hMax - hMin) * (W - 100); }
-      function y(p) { // log schaal
-        const logP = Math.log10(p);
+      function x(h) { return 70 + (h - hMin) / (hMax - hMin) * (W - 110); }
+      function y(p) {
+        const logP = Math.log10(Math.max(p, 0.1));
         const logMin = Math.log10(pMin);
         const logMax = Math.log10(pMax);
-        return H - 40 - (logP - logMin) / (logMax - logMin) * (H - 80);
+        return H - 50 - (logP - logMin) / (logMax - logMin) * (H - 90);
       }
 
-      // Achtergrond grid
+      // Grid
       ctx.strokeStyle = '#1e293b';
       ctx.lineWidth = 1;
       for (let h = 150; h <= 450; h += 50) {
-        ctx.beginPath(); ctx.moveTo(x(h), 20); ctx.lineTo(x(h), H-40); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x(h), 30); ctx.lineTo(x(h), H-50); ctx.stroke();
       }
 
-      // Verzadigingslijnen (vloeistof + damp)
+      // ===== ISOTHERMEN (temperatuurlijnen) =====
+      // In 2-fasengebied bijna horizontaal, daarna omhoog gebogen
+      const isothermen = [-30, -10, 10, 30, 50];
+      ctx.lineWidth = 1.2;
+      isothermen.forEach((T, idx) => {
+        const sat = interp(table, T);
+        ctx.strokeStyle = `hsla(${260 + idx*25}, 70%, 70%, 0.55)`;
+        ctx.beginPath();
+
+        // Links in vloeistof (bijna verticaal)
+        ctx.moveTo(x(sat.hf - 40), y(sat.P * 1.8));
+        ctx.lineTo(x(sat.hf), y(sat.P));
+
+        // Door 2-fasengebied (horizontaal)
+        ctx.lineTo(x(sat.hg), y(sat.P));
+
+        // Oververhit gebied: boog omhoog naar rechts
+        for (let i = 1; i <= 8; i++) {
+          const dh = i * 18;
+          const dp = Math.pow(1.25, i) * 0.15;
+          ctx.lineTo(x(sat.hg + dh), y(sat.P * (1 + dp)));
+        }
+        ctx.stroke();
+
+        // Label
+        ctx.fillStyle = `hsla(${260 + idx*25}, 70%, 75%, 0.9)`;
+        ctx.font = '11px system-ui';
+        ctx.fillText(T + '°C', x(sat.hg + 90), y(sat.P * 1.6) - 4);
+      });
+
+      // ===== ISENTROPEN (scheve lijnen) =====
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.45)';
+      ctx.lineWidth = 1.3;
+      // Een paar typische isentropen in oververhit gebied
+      const isentropStarts = [
+        {h: 360, p: 0.8},
+        {h: 380, p: 1.2},
+        {h: 400, p: 2.0},
+        {h: 420, p: 3.5}
+      ];
+      isentropStarts.forEach(start => {
+        ctx.beginPath();
+        ctx.moveTo(x(start.h), y(start.p));
+        // Isentroop loopt steil omhoog naar rechts
+        for (let i = 1; i <= 12; i++) {
+          const dh = i * 8;
+          const factor = Math.pow(1.35, i);
+          ctx.lineTo(x(start.h + dh), y(start.p * factor));
+        }
+        ctx.stroke();
+      });
+
+      // ===== VERZADIGINGSBOCHTEN (dampkoepel) =====
+      // Vloeistoflijn (links)
       ctx.beginPath();
       ctx.strokeStyle = '#38bdf8';
-      ctx.lineWidth = 2.5;
+      ctx.lineWidth = 3;
       table.forEach((pt, i) => {
         const xx = x(pt[2]);
         const yy = y(pt[1]);
@@ -264,8 +303,10 @@
       });
       ctx.stroke();
 
+      // Damplijn (rechts)
       ctx.beginPath();
       ctx.strokeStyle = '#f472b6';
+      ctx.lineWidth = 3;
       table.forEach((pt, i) => {
         const xx = x(pt[3]);
         const yy = y(pt[1]);
@@ -273,29 +314,29 @@
       });
       ctx.stroke();
 
-      // Cycluslijnen
+      // ===== CYCLUS =====
       ctx.strokeStyle = '#4ade80';
-      ctx.lineWidth = 3;
+      ctx.lineWidth = 3.5;
 
-      // 4 → 1 (verdamping, horizontaal bij Pe)
+      // 4 → 1 verdamping
       ctx.beginPath();
       ctx.moveTo(x(h4), y(Pe));
       ctx.lineTo(x(h1), y(Pe));
       ctx.stroke();
 
-      // 1 → 2 (compressie)
+      // 1 → 2 compressie
       ctx.beginPath();
       ctx.moveTo(x(h1), y(Pe));
       ctx.lineTo(x(h2), y(Pc));
       ctx.stroke();
 
-      // 2 → 3 (condensatie)
+      // 2 → 3 condensatie
       ctx.beginPath();
       ctx.moveTo(x(h2), y(Pc));
       ctx.lineTo(x(h3), y(Pc));
       ctx.stroke();
 
-      // 3 → 4 (expansie, verticaal)
+      // 3 → 4 expansie
       ctx.beginPath();
       ctx.moveTo(x(h3), y(Pc));
       ctx.lineTo(x(h4), y(Pe));
@@ -308,29 +349,33 @@
         {h: h3, p: Pc, label: '3'},
         {h: h4, p: Pe, label: '4'}
       ];
-      ctx.fillStyle = '#fbbf24';
       punten.forEach(pt => {
         ctx.beginPath();
-        ctx.arc(x(pt.h), y(pt.p), 7, 0, Math.PI*2);
-        ctx.fill();
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 13px system-ui';
-        ctx.fillText(pt.label, x(pt.h) + 10, y(pt.p) - 8);
         ctx.fillStyle = '#fbbf24';
+        ctx.arc(x(pt.h), y(pt.p), 8, 0, Math.PI*2);
+        ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.font = 'bold 12px system-ui';
+        ctx.fillText(pt.label, x(pt.h) - 4, y(pt.p) + 4);
       });
 
-      // Assen labels
+      // Assen
       ctx.fillStyle = '#94a3b8';
       ctx.font = '13px system-ui';
-      ctx.fillText('Enthalpie (kJ/kg)', W/2 - 50, H - 10);
+      ctx.fillText('Enthalpie h (kJ/kg) →', W/2 - 60, H - 15);
       ctx.save();
-      ctx.translate(18, H/2 + 40);
+      ctx.translate(22, H/2 + 50);
       ctx.rotate(-Math.PI/2);
-      ctx.fillText('Druk (bar abs) – log', 0, 0);
+      ctx.fillText('Druk p (bar abs)  –  logaritmisch', 0, 0);
       ctx.restore();
+
+      // Titel koudemiddel
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 14px system-ui';
+      ctx.fillText(ref, W - 100, 28);
     }
 
-    // Start met standaardwaarden
+    // Start
     bereken();
   </script>
 </body>
