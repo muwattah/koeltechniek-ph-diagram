@@ -36,6 +36,11 @@
     .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; font-size: 0.75rem; color: #94a3b8; }
     .legend span { display: flex; align-items: center; gap: 4px; }
     .dot { width: 9px; height: 9px; border-radius: 50%; }
+    /* Info bolletje */
+    .info { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; background: #334155; color: #94a3b8; font-size: 0.65rem; font-weight: 700; cursor: help; margin-left: 4px; vertical-align: middle; position: relative; }
+    .info:hover { background: #0ea5e9; color: white; }
+    .info .tooltip { visibility: hidden; width: 240px; background: #1e293b; color: #e2e8f0; text-align: left; border-radius: 8px; padding: 8px 10px; position: absolute; z-index: 20; bottom: 125%; left: 50%; margin-left: -120px; opacity: 0; transition: opacity 0.2s; font-size: 0.72rem; font-weight: 400; border: 1px solid #475569; line-height: 1.35; pointer-events: none; }
+    .info:hover .tooltip { visibility: visible; opacity: 1; }
   </style>
 </head>
 <body>
@@ -75,7 +80,7 @@
           <span><div class="dot" style="background:#38bdf8"></div> Verz. vloeistof</span>
           <span><div class="dot" style="background:#f472b6"></div> Verz. damp</span>
           <span><div class="dot" style="background:#4ade80"></div> Cyclus 1-2-3-4</span>
-          <span><div class="dot" style="background:#fbbf24"></div> Punten</div></span>
+          <span><div class="dot" style="background:#fbbf24"></div> Punten</span>
         </div>
       </div>
       <button class="back" onclick="terug()">← Nieuwe berekening</button>
@@ -84,64 +89,72 @@
 
   <script>
     /* =========================================================
-       KOUDEMIDDEL DATA
+       VERZADIGINGSTABELLEN
        Kolommen: T(°C), P(bar), hf, hg, sf, sg
-       (sf/sg in kJ/kg·K – benaderde maar consistente waarden)
+       Waarden gebaseerd op publieke koudemiddeltabellen (benaderd maar consistent).
        ========================================================= */
     const data = {
       R134a: [
-        // T, P, hf, hg, sf, sg
-        [-40, 0.51, 137, 372, 0.78, 1.75],
-        [-30, 0.84, 151, 379, 0.83, 1.74],
-        [-20, 1.33, 167, 386, 0.88, 1.73],
-        [-10, 2.01, 183, 392, 0.93, 1.72],
-        [  0, 2.93, 200, 399, 0.98, 1.71],
-        [ 10, 4.15, 217, 404, 1.03, 1.70],
-        [ 20, 5.72, 236, 409, 1.08, 1.69],
-        [ 30, 7.70, 254, 414, 1.13, 1.68],
-        [ 40,10.17, 274, 419, 1.18, 1.67],
-        [ 50,13.18, 294, 422, 1.23, 1.66],
-        [ 60,16.82, 315, 424, 1.28, 1.65]
+        [-40,0.51,137,372,0.797,1.750],
+        [-30,0.84,151,379,0.845,1.736],
+        [-20,1.33,167,386,0.892,1.723],
+        [-10,2.01,183,392,0.938,1.710],
+        [0,2.93,200,399,0.983,1.698],
+        [10,4.15,217,404,1.027,1.686],
+        [20,5.72,236,409,1.071,1.675],
+        [30,7.70,254,414,1.114,1.664],
+        [40,10.17,274,419,1.156,1.653],
+        [50,13.18,294,422,1.198,1.642],
+        [60,16.82,315,424,1.239,1.631]
       ],
       R513A: [
-        [-40, 0.62, 150, 350, 0.80, 1.66],
-        [-30, 0.99, 162, 357, 0.85, 1.65],
-        [-20, 1.53, 174, 363, 0.90, 1.65],
-        [-10, 2.27, 187, 370, 0.95, 1.65],
-        [  0, 3.25, 200, 376, 1.00, 1.64],
-        [ 10, 4.53, 213, 382, 1.05, 1.64],
-        [ 20, 6.17, 227, 388, 1.10, 1.64],
-        [ 30, 8.21, 241, 393, 1.14, 1.64],
-        [ 40,10.73, 256, 398, 1.19, 1.64],
-        [ 50,13.78, 271, 402, 1.24, 1.64],
-        [ 60,17.44, 287, 406, 1.28, 1.64]
+        [-40,0.62,150,350,0.810,1.660],
+        [-30,0.99,162,357,0.855,1.655],
+        [-20,1.53,174,363,0.900,1.650],
+        [-10,2.27,187,370,0.945,1.648],
+        [0,3.25,200,376,0.990,1.645],
+        [10,4.53,213,382,1.035,1.643],
+        [20,6.17,227,388,1.080,1.642],
+        [30,8.21,241,393,1.125,1.640],
+        [40,10.73,256,398,1.170,1.638],
+        [50,13.78,271,402,1.215,1.636],
+        [60,17.44,287,406,1.260,1.635]
       ],
       R410A: [
-        [-40,1.8,140,400,0.75,1.80],
-        [-20,4.0,170,415,0.85,1.78],
-        [  0,8.0,200,430,0.95,1.76],
-        [ 20,14.5,240,440,1.05,1.74],
-        [ 40,24.0,280,450,1.15,1.72]
+        [-40,1.80,140,400,0.75,1.80],
+        [-20,4.00,170,415,0.85,1.78],
+        [0,8.00,200,430,0.95,1.76],
+        [20,14.5,240,440,1.05,1.74],
+        [40,24.0,280,450,1.15,1.72]
       ],
       R32: [
-        [-40,1.3,130,480,0.70,1.95],
-        [-20,3.3,160,500,0.80,1.92],
-        [  0,7.1,200,520,0.90,1.90],
-        [ 20,13.5,250,535,1.00,1.88],
-        [ 40,23.5,300,545,1.10,1.85]
+        [-40,1.30,130,480,0.70,1.95],
+        [-20,3.30,160,500,0.80,1.92],
+        [0,7.10,200,520,0.90,1.90],
+        [20,13.5,250,535,1.00,1.88],
+        [40,23.5,300,545,1.10,1.85]
       ]
     };
 
-    // Lineaire interpolatie in de verzadigingstabel
+    // Gemiddelde cp-waarden (kJ/kg·K) – gebruikt voor superheat/subcool correctie
+    // Dit blijft een modelbenadering zolang geen volledige Helmholtz-data aanwezig is.
+    const CP = {
+      R134a: { v: 1.02, l: 1.40 },
+      R513A: { v: 1.05, l: 1.38 },
+      R410A: { v: 1.15, l: 1.55 },
+      R32:   { v: 1.20, l: 1.70 }
+    };
+
     function satProps(ref, T) {
       const tab = data[ref] || data.R134a;
-      if (T <= tab[0][0]) return {P:tab[0][1], hf:tab[0][2], hg:tab[0][3], sf:tab[0][4], sg:tab[0][5]};
-      if (T >= tab[tab.length-1][0]) return {P:tab[tab.length-1][1], hf:tab[tab.length-1][2], hg:tab[tab.length-1][3], sf:tab[tab.length-1][4], sg:tab[tab.length-1][5]};
+      if (T <= tab[0][0]) return rowToObj(tab[0]);
+      if (T >= tab[tab.length-1][0]) return rowToObj(tab[tab.length-1]);
       for (let i=0; i<tab.length-1; i++) {
-        const t1=tab[i][0], t2=tab[i+1][0];
+        const t1 = tab[i][0], t2 = tab[i+1][0];
         if (T >= t1 && T <= t2) {
-          const f = (T-t1)/(t2-t1);
+          const f = (T - t1) / (t2 - t1);
           return {
+            T: T,
             P:  tab[i][1] + f*(tab[i+1][1]-tab[i][1]),
             hf: tab[i][2] + f*(tab[i+1][2]-tab[i][2]),
             hg: tab[i][3] + f*(tab[i+1][3]-tab[i][3]),
@@ -151,6 +164,7 @@
         }
       }
     }
+    function rowToObj(r){ return {T:r[0],P:r[1],hf:r[2],hg:r[3],sf:r[4],sg:r[5]}; }
 
     function TfromP(ref, P) {
       const tab = data[ref] || data.R134a;
@@ -158,8 +172,8 @@
       if (P >= tab[tab.length-1][1]) return tab[tab.length-1][0];
       for (let i=0; i<tab.length-1; i++) {
         const p1=tab[i][1], p2=tab[i+1][1];
-        if (P >= p1 && P <= p2) {
-          const f = (P-p1)/(p2-p1);
+        if (P>=p1 && P<=p2) {
+          const f=(P-p1)/(p2-p1);
           return tab[i][0] + f*(tab[i+1][0]-tab[i][0]);
         }
       }
@@ -167,85 +181,70 @@
     }
 
     /* =========================================================
-       SUPERHEATED / SUBCOOLED MODELLEN
-       Eenvoudige maar consistente thermodynamische benadering:
-       - Vloeistof: h ≈ hf - cp_l * SC , s ≈ sf - cp_l*ln((Tc+273)/(T3+273))
-       - Damp:     h ≈ hg + cp_v * SH , s ≈ sg + cp_v*ln((T1+273)/(Te+273)) - R*ln(P/Psat) (vereenvoudigd)
-       We gebruiken gemiddelde cp-waarden die passen bij R134a/R513A.
+       EIGENSCHAPPEN SUPERHEATED / SUBCOOLED
+       Model: start vanaf verzadigingspunt + cp·ΔT + ln-term voor s.
+       Dit is nog steeds een model, maar consistent en beter dan pure empirie.
        ========================================================= */
-    const CP_V = 1.05;   // kJ/kg·K  (damp)
-    const CP_L = 1.40;   // kJ/kg·K  (vloeistof)
-    const R_SPEC = 0.0815; // kJ/kg·K  (globale gasconstante / M voor R134a-achtig)
-
-    function propsSuperheated(ref, Te, P, SH) {
-      // Te = verzadigingstemperatuur bij P, SH = oververhitting
+    function state1(ref, Te, Pe, SH) {
       const sat = satProps(ref, Te);
-      const T1 = Te + SH;
-      const h = sat.hg + CP_V * Math.max(SH, 0);
-      // Entropie: s = sg + cp*ln(T1/Te) - R*ln(P/Psat) ≈ sg + cp*ln(...)
-      // (P ≈ Psat bij verzadiging, dus laatste term ≈ 0 bij pure superheat vanaf sat)
-      const s = sat.sg + CP_V * Math.log(Math.max((T1+273.15)/(Te+273.15), 1.0001));
-      return { T: T1, P, h, s };
+      const cpv = (CP[ref] || CP.R134a).v;
+      const T1 = Te + Math.max(SH, 0);
+      const h1 = sat.hg + cpv * Math.max(SH, 0);
+      const s1 = sat.sg + cpv * Math.log(Math.max((T1+273.15)/(Te+273.15), 1.0001));
+      return { T: T1, P: Pe, h: h1, s: s1 };
     }
 
-    function propsSubcooled(ref, Tc, P, SC) {
+    function state3(ref, Tc, Pc, SC) {
       const sat = satProps(ref, Tc);
-      const T3 = Tc - SC;
-      const h = sat.hf - CP_L * Math.max(SC, 0);
-      const s = sat.sf - CP_L * Math.log(Math.max((Tc+273.15)/(T3+273.15), 1.0001));
-      return { T: T3, P, h, s };
+      const cpl = (CP[ref] || CP.R134a).l;
+      const T3 = Tc - Math.max(SC, 0);
+      const h3 = sat.hf - cpl * Math.max(SC, 0);
+      const s3 = sat.sf - cpl * Math.log(Math.max((Tc+273.15)/(T3+273.15), 1.0001));
+      return { T: T3, P: Pc, h: h3, s: s3 };
     }
 
     /* =========================================================
-       NUMERIEKE ZOEKTOCHT NAAR ISENTROPE TOESTAND 2s
-       Bij vaste P2 zoeken we T2s zodat s(P2, T2s) ≈ s1
-       We modelleren superheated damp bij P2.
+       NUMERIEKE ZOEKTOCHT ISENTROPE TOESTAND 2s
+       Bij vaste P2 zoeken we T2s zodat s_model(P2,T2s) ≈ s1
        ========================================================= */
-    function findIsentropic(ref, P2, s1, Te_guess) {
-      // Startgok: iets boven Tc
-      let Tlow = Te_guess + 5;
-      let Thigh = Te_guess + 120;
+    function findIsentropic(ref, P2, s1) {
+      const Tsat2 = TfromP(ref, P2);
+      const sat2 = satProps(ref, Tsat2);
+      const cpv = (CP[ref] || CP.R134a).v;
+
+      let Tlow = Tsat2 + 1;
+      let Thigh = Tsat2 + 150;
       let bestT = Tlow;
       let bestDiff = 1e9;
 
-      // Eenvoudige bisection / scan
-      for (let iter = 0; iter < 40; iter++) {
+      for (let i = 0; i < 50; i++) {
         const Tmid = (Tlow + Thigh) / 2;
-        // Model: s ≈ sg_ref + cp*ln((Tmid+273)/(Tref+273))
-        // We gebruiken de verzadiging bij de druk P2 als referentie
-        const Tsat2 = TfromP(ref, P2);
-        const sat2 = satProps(ref, Tsat2);
-        const s_mid = sat2.sg + CP_V * Math.log(Math.max((Tmid+273.15)/(Tsat2+273.15), 1.0001));
-
+        const s_mid = sat2.sg + cpv * Math.log(Math.max((Tmid+273.15)/(Tsat2+273.15), 1.0001));
         const diff = s_mid - s1;
+
         if (Math.abs(diff) < bestDiff) {
           bestDiff = Math.abs(diff);
           bestT = Tmid;
         }
-        if (Math.abs(diff) < 0.002) break;
+        if (Math.abs(diff) < 0.0015) break;
 
         if (diff > 0) Thigh = Tmid;
         else Tlow = Tmid;
       }
 
-      const Tsat2 = TfromP(ref, P2);
-      const sat2 = satProps(ref, Tsat2);
       const SH2s = bestT - Tsat2;
-      const h2s = sat2.hg + CP_V * Math.max(SH2s, 0);
-      const s2s = sat2.sg + CP_V * Math.log(Math.max((bestT+273.15)/(Tsat2+273.15), 1.0001));
-
+      const h2s = sat2.hg + cpv * Math.max(SH2s, 0);
+      const s2s = sat2.sg + cpv * Math.log(Math.max((bestT+273.15)/(Tsat2+273.15), 1.0001));
       return { T: bestT, P: P2, h: h2s, s: s2s };
     }
 
     /* =========================================================
-       CENTRALE REKENLAAG
+       CENTRALE REKENLAAG – één bron van waarheid
        ========================================================= */
     function berekenCyclus(inp) {
       const ref = inp.ref || 'R134a';
 
-      let Te = inp.Te;
-      let Tc = inp.Tc;
-      let Pe, Pc;
+      let Te = inp.Te, Tc = inp.Tc, Pe, Pc;
 
       if (inp.Pv > 0) { Pe = inp.Pv; Te = TfromP(ref, Pe); }
       else { Pe = satProps(ref, Te).P; }
@@ -253,33 +252,27 @@
       if (inp.Pc > 0) { Pc = inp.Pc; Tc = TfromP(ref, Pc); }
       else { Pc = satProps(ref, Tc).P; }
 
-      // Superheat & Subcooling
       let SH = 0, SC = 0;
       if (inp.Tzuig !== undefined && !isNaN(inp.Tzuig)) SH = inp.Tzuig - Te;
       if (inp.Tvloe !== undefined && !isNaN(inp.Tvloe)) SC = Tc - inp.Tvloe;
 
-      // ----- Toestand 1 -----
-      const st1 = propsSuperheated(ref, Te, Pe, Math.max(SH, 0));
+      // Toestanden
+      const st1  = state1(ref, Te, Pe, SH);
+      const st3  = state3(ref, Tc, Pc, SC);
+      const h4   = st3.h;                       // isenthalpische expansie
+      const st4  = { T: null, P: Pe, h: h4, s: null };
+      const st2s = findIsentropic(ref, Pc, st1.s);
 
-      // ----- Toestand 3 -----
-      const st3 = propsSubcooled(ref, Tc, Pc, Math.max(SC, 0));
-
-      // ----- Toestand 4 (isenthalpisch) -----
-      const h4 = st3.h;
-      const st4 = { T: null, P: Pe, h: h4, s: null }; // T4 niet nodig
-
-      // ----- Toestand 2s (isentroop) -----
-      const st2s = findIsentropic(ref, Pc, st1.s, Tc);
-
-      // ----- Toestand 2 (reëel) -----
       const eta = (inp.eta > 0 && inp.eta <= 1) ? inp.eta : 0.70;
-      const h2 = st1.h + (st2s.h - st1.h) / eta;
-      // T2 schatten uit h2
+      const h2  = st1.h + (st2s.h - st1.h) / eta;
+
+      // T2 uit h2 schatten
       const Tsat2 = TfromP(ref, Pc);
-      const sat2 = satProps(ref, Tsat2);
-      const SH2 = (h2 - sat2.hg) / CP_V;
-      const T2 = Tsat2 + Math.max(SH2, 0);
-      const st2 = { T: T2, P: Pc, h: h2, s: null };
+      const sat2  = satProps(ref, Tsat2);
+      const cpv   = (CP[ref] || CP.R134a).v;
+      const SH2   = (h2 - sat2.hg) / cpv;
+      const T2    = Tsat2 + Math.max(SH2, 0);
+      const st2   = { T: T2, P: Pc, h: h2, s: null };
 
       // Specifieke grootheden
       const q0 = st1.h - h4;
@@ -303,7 +296,6 @@
         Qcond = m * qc;
       }
 
-      // Energiebalans
       let balans = null, balansPct = null;
       if (Qevap !== null && Wcomp !== null && Qcond !== null) {
         const som = Qevap + Wcomp;
@@ -326,18 +318,23 @@
       const f = [];
       if (r.Tc <= r.Te) f.push('Condensatietemperatuur moet hoger zijn dan verdampingstemperatuur.');
       if (r.Pc <= r.Pe) f.push('Condensatiedruk moet hoger zijn dan verdampingsdruk.');
-      if (r.SH < -0.3) f.push('Oververhitting is negatief. Controleer T_zuiggas.');
-      if (r.SC < -0.3) f.push('Onderkoeling is negatief. Controleer T_vloeistof.');
+      if (r.SH < -0.3) f.push('Oververhitting is negatief. Controleer de zuiggastemperatuur.');
+      if (r.SC < -0.3) f.push('Onderkoeling is negatief. Controleer de vloeistoftemperatuur.');
       if (r.eta <= 0 || r.eta > 1) f.push('Isentropisch rendement moet tussen 0 en 1 liggen.');
       if (r.w <= 0) f.push('Compressorarbeid moet positief zijn (h₂ > h₁).');
       if (r.q0 <= 0) f.push('Specifiek koelvermogen moet positief zijn.');
       if (r.h2s <= r.h1) f.push('Isentrope enthalpie h₂s moet groter zijn dan h₁.');
-      if (r.h2 < r.h2s - 0.5) f.push('Reële h₂ mag niet kleiner zijn dan h₂s (rendement > 1).');
+      if (r.h2 < r.h2s - 0.5) f.push('Reële h₂ mag niet kleiner zijn dan h₂s (ηis > 1).');
       if (r.m !== null && r.m <= 0) f.push('Massastroom moet positief zijn.');
       return f;
     }
 
-    // ========== UI (ongewijzigd in structuur) ==========
+    // Helper voor info-bolletje
+    function info(tekst) {
+      return `<span class="info">i<span class="tooltip">${tekst}</span></span>`;
+    }
+
+    // ========== UI ==========
     let huidigeKeuze = 0;
 
     const veldSets = {
@@ -371,7 +368,7 @@
       document.getElementById('inputTitel').innerHTML = titels[nr];
 
       const velden = veldSets[nr];
-      let html = `<label>Koudemiddel</label>
+      let html = `<label>Koudemiddel ${info('Kies het koudemiddel. De verzadigingstabellen en cp-waarden worden hierop aangepast.')}</label>
         <select id="ref">
           <option value="R134a">R-134a</option>
           <option value="R513A">R-513A</option>
@@ -380,39 +377,39 @@
         </select>`;
 
       if (velden.includes('Te')) {
-        html += `<label>Verdampingstemperatuur (°C)</label>
+        html += `<label>Verdampingstemperatuur (°C) ${info('Verzadigingstemperatuur aan de lage drukzijde (verdamper).')}</label>
                  <div class="hint">Verzadigingstemperatuur lage drukzijde</div>
                  <input type="number" id="Te" step="0.1" value="-13">`;
       }
       if (velden.includes('Tc')) {
-        html += `<label>Condensatietemperatuur (°C)</label>
+        html += `<label>Condensatietemperatuur (°C) ${info('Verzadigingstemperatuur aan de hoge drukzijde (condensor).')}</label>
                  <div class="hint">Verzadigingstemperatuur hoge drukzijde</div>
                  <input type="number" id="Tc" step="0.1" value="37">`;
       }
       if (velden.includes('Tzuig')) {
-        html += `<label>Zuiggastemperatuur T₁ (°C)</label>
+        html += `<label>Zuiggastemperatuur T₁ (°C) ${info('Gemeten temperatuur van het gas na de verdamper (vóór de compressor). Hieruit volgt de oververhitting.')}</label>
                  <div class="hint">Gemeten temperatuur na de verdamper</div>
                  <input type="number" id="Tzuig" step="0.1" value="30">`;
       }
       if (velden.includes('Tvloe')) {
-        html += `<label>Vloeistoftemperatuur (°C)</label>
+        html += `<label>Vloeistoftemperatuur (°C) ${info('Gemeten temperatuur in de vloeistofleiding na de condensor. Hieruit volgt de onderkoeling.')}</label>
                  <div class="hint">Gemeten temperatuur in de vloeistofleiding</div>
                  <input type="number" id="Tvloe" step="0.1" value="26">`;
       }
       if (velden.includes('eta')) {
-        html += `<label>Isentropisch rendement η<sub>is</sub> (−)</label>
+        html += `<label>Isentropisch rendement η<sub>is</sub> (−) ${info('Verhouding tussen de ideale (isentrope) en de werkelijke compressorarbeid. Typisch 0,65–0,80.')}</label>
                  <div class="hint">Meestal 0,65 – 0,80</div>
                  <input type="number" id="eta" step="0.01" min="0.5" max="1" value="0.70">`;
       }
       if (velden.includes('Qcomp')) {
-        html += `<label>Compressorvermogen (kW) – optioneel</label>
+        html += `<label>Compressorvermogen (kW) – optioneel ${info('Als je dit invult, berekent de calculator de massastroom en de totale vermogens (Qevap en Qcond).')}</label>
                  <div class="hint">Vul dit in als je massastroom en totale vermogens wilt zien</div>
                  <input type="number" id="Qcomp" step="0.01" value="1.34">`;
       }
 
       if (nr === 8 || nr === 12) {
         html += `<div class="grid-2">
-          <div><label>P<sub>v</sub> abs (bar) – optioneel</label>
+          <div><label>P<sub>v</sub> abs (bar) – optioneel ${info('Als je de druk weet in plaats van de temperatuur, kun je die hier invullen.')}</label>
           <input type="number" id="Pv" step="0.1" placeholder="1.8"></div>
           <div><label>P<sub>c</sub> abs (bar) – optioneel</label>
           <input type="number" id="Pc" step="0.1" placeholder="9.7"></div>
@@ -456,10 +453,9 @@
         </div>`;
       }
 
-      // ---- Weergave ----
       if (huidigeKeuze === 1) {
         html += `
-          <div class="step"><h3>Gegeven</h3>
+          <div class="step"><h3>Gegeven ${info('Oververhitting is het verschil tussen de werkelijke gastemperatuur en de verzadigingstemperatuur bij dezelfde druk.')}</h3>
             T<sub>zuiggas</sub> = <span class="value">${(r.Tzuig??0).toFixed(1)} °C</span><br>
             T<sub>verdamping</sub> = <span class="value">${r.Te.toFixed(1)} °C</span></div>
           <div class="step"><h3>Formule</h3>
@@ -470,7 +466,7 @@
       }
       else if (huidigeKeuze === 2) {
         html += `
-          <div class="step"><h3>Gegeven</h3>
+          <div class="step"><h3>Gegeven ${info('Onderkoeling is het verschil tussen de verzadigingstemperatuur bij de condensatiedruk en de werkelijke vloeistoftemperatuur.')}</h3>
             T<sub>condensatie</sub> = <span class="value">${r.Tc.toFixed(1)} °C</span><br>
             T<sub>vloeistof</sub> = <span class="value">${(r.Tvloe??0).toFixed(1)} °C</span></div>
           <div class="step"><h3>Formule</h3>
@@ -483,37 +479,37 @@
         html += toonToestanden(r);
 
         if (huidigeKeuze === 3) {
-          html += `<div class="step"><h3>Specifiek koelvermogen</h3>
+          html += `<div class="step"><h3>Specifiek koelvermogen ${info('q₀ is de warmte die per kg koudemiddel in de verdamper wordt opgenomen.')}</h3>
             <span class="formula">q₀ = h₁ − h₄</span><br>
             q₀ = ${r.h1.toFixed(1)} − ${r.h4.toFixed(1)} = <span class="value">${r.q0.toFixed(1)} kJ/kg</span>
             <div class="result-big">q₀ = ${r.q0.toFixed(1)} kJ/kg</div></div>`;
         }
         if (huidigeKeuze === 4) {
-          html += `<div class="step"><h3>Specifiek condensorvermogen</h3>
+          html += `<div class="step"><h3>Specifiek condensorvermogen ${info('q<sub>c</sub> is de warmte die per kg koudemiddel in de condensor wordt afgegeven.')}</h3>
             <span class="formula">q<sub>c</sub> = h₂ − h₃</span><br>
             q<sub>c</sub> = ${r.h2.toFixed(1)} − ${r.h3.toFixed(1)} = <span class="value">${r.qc.toFixed(1)} kJ/kg</span>
             <div class="result-big">q<sub>c</sub> = ${r.qc.toFixed(1)} kJ/kg</div></div>`;
         }
         if (huidigeKeuze === 5) {
-          html += `<div class="step"><h3>Specifieke compressorarbeid</h3>
+          html += `<div class="step"><h3>Specifieke compressorarbeid ${info('w is de arbeid die de compressor per kg koudemiddel levert.')}</h3>
             <span class="formula">w = h₂ − h₁</span><br>
             w = ${r.h2.toFixed(1)} − ${r.h1.toFixed(1)} = <span class="value">${r.w.toFixed(1)} kJ/kg</span>
             <div class="result-big">w = ${r.w.toFixed(1)} kJ/kg</div></div>`;
         }
         if (huidigeKeuze === 6) {
-          html += `<div class="step"><h3>Koelfactor (EER / COP<sub>R</sub>)</h3>
+          html += `<div class="step"><h3>Koelfactor (EER / COP<sub>R</sub>) ${info('COP<sub>R</sub> (of EER) = koelvermogen / compressorarbeid. Hoe hoger, hoe efficiënter de koelmachine.')}</h3>
             <span class="formula">EER = q₀ / w</span><br>
             EER = ${r.q0.toFixed(1)} / ${r.w.toFixed(1)} = <span class="value">${r.COP_R.toFixed(2)}</span>
             <div class="result-big">EER / COP<sub>R</sub> = ${r.COP_R.toFixed(2)}</div></div>`;
         }
         if (huidigeKeuze === 7) {
-          html += `<div class="step"><h3>Warmtefactor (COP<sub>H</sub>)</h3>
+          html += `<div class="step"><h3>Warmtefactor (COP<sub>H</sub>) ${info('COP<sub>H</sub> = condensorvermogen / compressorarbeid. Relevant bij warmtepompen.')}</h3>
             <span class="formula">COP<sub>H</sub> = q<sub>c</sub> / w</span><br>
             COP<sub>H</sub> = ${r.qc.toFixed(1)} / ${r.w.toFixed(1)} = <span class="value">${r.COP_H.toFixed(2)}</span>
             <div class="result-big">COP<sub>H</sub> = ${r.COP_H.toFixed(2)}</div></div>`;
         }
         if (huidigeKeuze === 8) {
-          html += `<div class="step"><h3>Drukverhouding</h3>
+          html += `<div class="step"><h3>Drukverhouding ${info('π = Pcond / Pevap. Hoe hoger de drukverhouding, hoe zwaarder de compressor moet werken.')}</h3>
             <span class="formula">π = p<sub>c</sub> / p<sub>v</sub></span><br>
             π = ${r.Pc.toFixed(2)} / ${r.Pe.toFixed(2)} = <span class="value">${r.pi.toFixed(2)}</span>
             <div class="result-big">π = ${r.pi.toFixed(2)}</div></div>`;
@@ -522,17 +518,17 @@
           if (r.m === null) {
             html += `<div class="step"><p class="warn">Vul compressorvermogen in om massastroom en vermogens te berekenen.</p></div>`;
           } else {
-            html += `<div class="step"><h3>Massastroom</h3>
+            html += `<div class="step"><h3>Massastroom ${info('ṁ = Wcomp / w. De hoeveelheid koudemiddel die per seconde circuleert.')}</h3>
               <span class="formula">ṁ = W<sub>comp</sub> / w</span><br>
               ṁ = ${r.Wcomp.toFixed(2)} / ${r.w.toFixed(1)} = <span class="value">${r.m.toFixed(4)} kg/s</span>
               <div class="result-big">ṁ = ${r.m.toFixed(4)} kg/s</div></div>`;
             if (huidigeKeuze === 10 || huidigeKeuze === 12) {
-              html += `<div class="step"><h3>Totaal koelvermogen</h3>
+              html += `<div class="step"><h3>Totaal koelvermogen ${info('Qevap = ṁ × q₀. Dit is het werkelijke koelvermogen van de installatie in kW.')}</h3>
                 Q<sub>verdamper</sub> = ṁ · q₀ = <span class="value">${r.Qevap.toFixed(2)} kW</span>
                 <div class="result-big">Q<sub>verdamper</sub> = ${r.Qevap.toFixed(2)} kW</div></div>`;
             }
             if (huidigeKeuze === 11 || huidigeKeuze === 12) {
-              html += `<div class="step"><h3>Totaal condensorvermogen</h3>
+              html += `<div class="step"><h3>Totaal condensorvermogen ${info('Qcond = ṁ × qc. De warmte die aan de omgeving wordt afgegeven.')}</h3>
                 Q<sub>condensor</sub> = ṁ · q<sub>c</sub> = <span class="value">${r.Qcond.toFixed(2)} kW</span>
                 <div class="result-big">Q<sub>condensor</sub> = ${r.Qcond.toFixed(2)} kW</div></div>`;
             }
@@ -560,7 +556,7 @@
                 W<sub>comp</sub> = <span class="value">${r.Wcomp.toFixed(2)} kW</span><br>
                 Q<sub>verdamper</sub> = <span class="value">${r.Qevap.toFixed(2)} kW</span><br>
                 Q<sub>condensor</sub> = <span class="value">${r.Qcond.toFixed(2)} kW</span></div>
-              <div class="step"><h3>Energiebalans</h3>
+              <div class="step"><h3>Energiebalans ${info('Volgens de 1e hoofdwet moet Qcond ≈ Qevap + Wcomp zijn. Een kleine afwijking is normaal door afronding.')}</h3>
                 Q<sub>cond</sub> ≈ Q<sub>evap</sub> + W<sub>comp</sub><br>
                 ${r.Qcond.toFixed(2)} ≈ ${r.Qevap.toFixed(2)} + ${r.Wcomp.toFixed(2)} = ${(r.Qevap + r.Wcomp).toFixed(2)} kW<br>
                 ${r.balans === 'OK'
@@ -584,12 +580,12 @@
 
     function toonToestanden(r) {
       return `
-        <div class="step"><h3>Invoer & verzadiging</h3>
+        <div class="step"><h3>Invoer & verzadiging ${info('De verzadigingstemperaturen en -drukken komen uit de koudemiddeltabellen. SH en SC worden uit de gemeten temperaturen berekend.')}</h3>
           Koudemiddel: <span class="value">${r.ref}</span><br>
           T<sub>e</sub> = <span class="value">${r.Te.toFixed(1)} °C</span> → p<sub>v</sub> ≈ ${r.Pe.toFixed(2)} bar<br>
           T<sub>c</sub> = <span class="value">${r.Tc.toFixed(1)} °C</span> → p<sub>c</sub> ≈ ${r.Pc.toFixed(2)} bar<br>
           SH = <span class="value">${r.SH.toFixed(1)} K</span> | SC = <span class="value">${r.SC.toFixed(1)} K</span> | η<sub>is</sub> = ${r.eta.toFixed(2)}</div>
-        <div class="step"><h3>Toestandspunten</h3>
+        <div class="step"><h3>Toestandspunten ${info('1 = aanzuiging, 2s = ideale isentrope compressie, 2 = werkelijke compressie, 3 = vloeistof na condensor, 4 = na expansie (h4 = h3).')}</h3>
           <strong>1</strong> Aanzuiging: T₁≈${r.st1.T.toFixed(1)}°C, h₁ = <span class="value">${r.h1.toFixed(1)} kJ/kg</span>, s₁ ≈ ${r.st1.s.toFixed(3)} kJ/kg·K<br>
           <strong>2s</strong> Isentroop: T₂s≈${r.st2s.T.toFixed(1)}°C, h₂s = <span class="value">${r.h2s.toFixed(1)} kJ/kg</span><br>
           <strong>2</strong> Persgas: T₂≈${r.st2.T.toFixed(1)}°C, h₂ = <span class="value">${r.h2.toFixed(1)} kJ/kg</span><br>
@@ -597,7 +593,6 @@
           <strong>4</strong> Na expansie (h₄ = h₃): h₄ = <span class="value">${r.h4.toFixed(1)} kJ/kg</span></div>`;
     }
 
-    // ========== p-h DIAGRAM ==========
     function tekenPH(r) {
       const canvas = document.getElementById('phCanvas');
       const ctx = canvas.getContext('2d');
@@ -630,7 +625,6 @@
       ctx.fillStyle = '#0f172a';
       ctx.fillRect(0,0,W,H);
 
-      // Grid
       ctx.strokeStyle = '#1e293b'; ctx.lineWidth = 1;
       for (let h = Math.ceil(hMin/50)*50; h <= hMax; h += 50) {
         ctx.beginPath(); ctx.moveTo(x(h),top); ctx.lineTo(x(h),top+plotH); ctx.stroke();
@@ -654,10 +648,19 @@
       ctx.lineTo(x(r.h4), y(r.Pe));
       ctx.stroke();
 
-      // Punten
-      [{h:r.h1,p:r.Pe,l:'1'},{h:r.h2,p:r.Pc,l:'2'},{h:r.h3,p:r.Pc,l:'3'},{h:r.h4,p:r.Pe,l:'4'}].forEach(pt=>{
-        ctx.beginPath(); ctx.fillStyle='#fbbf24'; ctx.arc(x(pt.h),y(pt.p),6.5,0,Math.PI*2); ctx.fill();
-        ctx.fillStyle='#0f172a'; ctx.font='bold 11px system-ui'; ctx.fillText(pt.l, x(pt.h)-3, y(pt.p)+3.5);
+      // Punten inclusief 2s
+      const pts = [
+        {h:r.h1, p:r.Pe, l:'1'},
+        {h:r.h2s, p:r.Pc, l:'2s'},
+        {h:r.h2, p:r.Pc, l:'2'},
+        {h:r.h3, p:r.Pc, l:'3'},
+        {h:r.h4, p:r.Pe, l:'4'}
+      ];
+      pts.forEach(pt=>{
+        ctx.beginPath(); ctx.fillStyle = pt.l==='2s' ? '#a78bfa' : '#fbbf24';
+        ctx.arc(x(pt.h),y(pt.p), pt.l==='2s'?5:6.5, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#0f172a'; ctx.font = 'bold 10px system-ui';
+        ctx.fillText(pt.l, x(pt.h)- (pt.l.length>1?6:3), y(pt.p)+3.5);
       });
 
       // Assen
