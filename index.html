@@ -3,373 +3,401 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Koeltechniek Calculator – Log p-h + Alle berekeningen</title>
+  <title>Koeltechniek Categorie 1 – Calculator</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; line-height: 1.5; }
-    .container { max-width: 1280px; margin: 0 auto; padding: 16px; }
-    h1 { text-align: center; margin-bottom: 6px; color: #38bdf8; font-size: 1.6rem; }
-    .subtitle { text-align: center; color: #94a3b8; margin-bottom: 20px; font-size: 0.95rem; }
-    .grid { display: grid; grid-template-columns: 320px 1fr; gap: 20px; }
-    @media (max-width: 950px) { .grid { grid-template-columns: 1fr; } }
-    .card { background: #1e293b; border-radius: 12px; padding: 18px; border: 1px solid #334155; }
+    .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+    h1 { text-align: center; color: #38bdf8; margin-bottom: 6px; font-size: 1.5rem; }
+    .subtitle { text-align: center; color: #94a3b8; margin-bottom: 24px; font-size: 0.95rem; }
+    .card { background: #1e293b; border-radius: 12px; padding: 22px; border: 1px solid #334155; margin-bottom: 18px; }
     h2 { color: #38bdf8; font-size: 1.15rem; margin-bottom: 14px; }
-    label { display: block; margin-bottom: 3px; font-size: 0.85rem; color: #94a3b8; }
-    select, input[type=number] { width: 100%; padding: 9px 11px; margin-bottom: 12px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #e2e8f0; font-size: 0.95rem; }
-    .check-group { margin: 12px 0; }
-    .check-group label { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; color: #e2e8f0; font-size: 0.9rem; cursor: pointer; }
-    .check-group input { width: auto; margin: 0; }
-    button { width: 100%; padding: 12px; background: #0ea5e9; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 6px; }
-    button:hover { background: #0284c7; }
-    canvas { width: 100%; background: #0f172a; border-radius: 8px; border: 1px solid #334155; }
-    .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; font-size: 0.8rem; }
-    .legend span { display: flex; align-items: center; gap: 5px; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .results { margin-top: 16px; }
-    .step { background: #0f172a; border-radius: 8px; padding: 12px 14px; margin-bottom: 10px; border-left: 4px solid #0ea5e9; }
-    .step h3 { color: #38bdf8; font-size: 0.95rem; margin-bottom: 6px; }
-    .step p, .step div { font-size: 0.9rem; color: #cbd5e1; }
-    .formula { font-family: ui-monospace, monospace; background: #1e293b; padding: 2px 6px; border-radius: 4px; color: #4ade80; }
+    .menu-btn { display: block; width: 100%; text-align: left; padding: 12px 16px; margin-bottom: 8px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 0.95rem; cursor: pointer; transition: all 0.15s; }
+    .menu-btn:hover { background: #1e293b; border-color: #0ea5e9; color: #38bdf8; }
+    .menu-btn.active { background: #0ea5e9; border-color: #0ea5e9; color: white; }
+    label { display: block; margin-bottom: 4px; font-size: 0.85rem; color: #94a3b8; }
+    input, select { width: 100%; padding: 10px 12px; margin-bottom: 14px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #e2e8f0; font-size: 1rem; }
+    button.calc { width: 100%; padding: 13px; background: #0ea5e9; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 6px; }
+    button.calc:hover { background: #0284c7; }
+    button.back { background: transparent; border: 1px solid #475569; color: #94a3b8; padding: 10px; border-radius: 8px; width: 100%; margin-top: 10px; cursor: pointer; }
+    button.back:hover { border-color: #94a3b8; color: #e2e8f0; }
+    .step { background: #0f172a; border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; border-left: 4px solid #0ea5e9; }
+    .step h3 { color: #38bdf8; font-size: 0.95rem; margin-bottom: 8px; }
+    .formula { font-family: ui-monospace, monospace; background: #1e293b; padding: 3px 7px; border-radius: 4px; color: #4ade80; }
     .value { color: #fbbf24; font-weight: 600; }
-    .cop-big { font-size: 1.5rem; font-weight: 700; color: #4ade80; margin: 8px 0; }
-    .note { font-size: 0.8rem; color: #64748b; margin-top: 12px; }
+    .result-big { font-size: 1.4rem; font-weight: 700; color: #4ade80; margin-top: 8px; }
+    .hidden { display: none; }
+    .note { font-size: 0.8rem; color: #64748b; margin-top: 10px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Koeltechniek Calculator</h1>
-    <p class="subtitle">Kies wat je wilt berekenen → stap-voor-stap uitwerking + diagram</p>
+    <h1>Koeltechniek – Categorie 1</h1>
+    <p class="subtitle">Kies een berekening → vul alleen de benodigde gegevens in → krijg stap-voor-stap uitwerking</p>
 
-    <div class="grid">
-      <!-- INPUTS -->
-      <div class="card">
-        <h2>1. Gegevens invullen</h2>
+    <!-- MENU -->
+    <div class="card" id="menuCard">
+      <h2>Welke berekening wil je uitvoeren?</h2>
+      <button class="menu-btn" onclick="kies(1)">1. Oververhitting (ΔT<sub>over</sub>)</button>
+      <button class="menu-btn" onclick="kies(2)">2. Onderkoeling (ΔT<sub>onder</sub>)</button>
+      <button class="menu-btn" onclick="kies(3)">3. Specifiek koelvermogen (ε<sub>k</sub> / q₀)</button>
+      <button class="menu-btn" onclick="kies(4)">4. Specifiek condensorvermogen (ε<sub>w</sub> / q<sub>c</sub>)</button>
+      <button class="menu-btn" onclick="kies(5)">5. Specifieke compressorarbeid (Δh<sub>comp</sub> / w)</button>
+      <button class="menu-btn" onclick="kies(6)">6. Koelfactor (EER)</button>
+      <button class="menu-btn" onclick="kies(7)">7. Warmtefactor (COP)</button>
+      <button class="menu-btn" onclick="kies(8)">8. Drukverhouding (π)</button>
+      <button class="menu-btn" onclick="kies(9)">9. Massastroom (ṁ)</button>
+      <button class="menu-btn" onclick="kies(10)">10. Totaal koelvermogen (Q<sub>verdamper</sub>)</button>
+      <button class="menu-btn" onclick="kies(11)">11. Totaal condensorvermogen (Q<sub>condensor</sub>)</button>
+      <button class="menu-btn" onclick="kies(12)">12. Complete set (meerdere tegelijk)</button>
+    </div>
 
-        <label>Koudemiddel</label>
-        <select id="refrigerant">
-          <option value="R513A">R-513A</option>
-          <option value="R134a" selected>R-134a</option>
-          <option value="R410A">R-410A</option>
-          <option value="R32">R-32</option>
-        </select>
+    <!-- INPUT FORMULIER (dynamisch) -->
+    <div class="card hidden" id="inputCard">
+      <h2 id="inputTitel">Gegevens</h2>
+      <div id="inputVelden"></div>
+      <button class="calc" onclick="uitvoeren()">Bereken</button>
+      <button class="back" onclick="terug()">← Terug naar menu</button>
+    </div>
 
-        <label>Verdampingsdruk Pv (bar abs) of laat leeg</label>
-        <input type="number" id="pv" step="0.1" placeholder="bijv. 1.8">
-
-        <label>Condensatiedruk Pc (bar abs) of laat leeg</label>
-        <input type="number" id="pc" step="0.1" placeholder="bijv. 9.7">
-
-        <label>Verdampings-temperatuur (°C) – als geen druk</label>
-        <input type="number" id="tevap" value="-13" step="1">
-
-        <label>Condensatie-temperatuur (°C) – als geen druk</label>
-        <input type="number" id="tcond" value="37" step="1">
-
-        <label>Gemeten T<sub>z</sub> / zuig- of persgastemp (°C)</label>
-        <input type="number" id="tz" value="30" step="0.1">
-
-        <label>Gemeten vloeistoftemperatuur T<sub>vloe</sub> (°C)</label>
-        <input type="number" id="tvloe" value="26" step="0.1">
-
-        <label>Compressorvermogen Q<sub>comp</sub> (kW) – optioneel</label>
-        <input type="number" id="qcomp" value="1.34" step="0.01" placeholder="leeg laten als onbekend">
-
-        <label>Isentropisch rendement (0.6–1.0)</label>
-        <input type="number" id="eta" value="0.70" step="0.05" min="0.5" max="1">
-
-        <h2 style="margin-top:18px;">2. Wat wil je berekenen?</h2>
-        <div class="check-group">
-          <label><input type="checkbox" id="chk_over" checked> Oververhitting (ΔT<sub>over</sub>)</label>
-          <label><input type="checkbox" id="chk_onder" checked> Onderkoeling (ΔT<sub>onder</sub>)</label>
-          <label><input type="checkbox" id="chk_ek" checked> ε<sub>k</sub> (koelfactor / h-verschil)</label>
-          <label><input type="checkbox" id="chk_ew" checked> ε<sub>w</sub> (warmtefactor)</label>
-          <label><input type="checkbox" id="chk_cop" checked> COP & EER</label>
-          <label><input type="checkbox" id="chk_m" checked> Massastroom m</label>
-          <label><input type="checkbox" id="chk_q" checked> Q<sub>condensor</sub> & Q<sub>verdamper</sub></label>
-          <label><input type="checkbox" id="chk_diagram" checked> Log p-h diagram tekenen</label>
-        </div>
-
-        <button onclick="bereken()">Bereken alles wat aangevinkt is</button>
-        <div class="note">Vul de gegevens in, vink aan wat je wilt zien, en klik op de knop. Alles wordt stap-voor-stap uitgewerkt zoals op het schoolbord.</div>
-      </div>
-
-      <!-- OUTPUT -->
-      <div>
-        <div class="card" id="diagramCard" style="display:none;">
-          <canvas id="phCanvas" width="800" height="480"></canvas>
-          <div class="legend">
-            <span><div class="dot" style="background:#38bdf8"></div> Verz. vloeistof</span>
-            <span><div class="dot" style="background:#f472b6"></div> Verz. damp</span>
-            <span><div class="dot" style="background:#a78bfa"></div> Isothermen</span>
-            <span><div class="dot" style="background:#4ade80"></div> Cyclus</span>
-          </div>
-        </div>
-
-        <div class="card results" id="resultsCard" style="margin-top:16px; display:none;">
-          <h2>Stap-voor-stap berekening</h2>
-          <div id="stappen"></div>
-        </div>
-      </div>
+    <!-- RESULTAAT -->
+    <div class="card hidden" id="resultCard">
+      <h2>Stap-voor-stap uitwerking</h2>
+      <div id="resultaat"></div>
+      <button class="back" onclick="terug()">← Nieuwe berekening</button>
     </div>
   </div>
 
   <script>
-    const data = {
-      R513A: { table: [
-        [-50,0.37,138,344],[-40,0.62,150,350],[-30,0.99,162,357],[-20,1.53,174,363],
-        [-10,2.27,187,370],[0,3.25,200,376],[10,4.53,213,382],[20,6.17,227,388],
-        [30,8.21,241,393],[40,10.73,256,398],[50,13.78,271,402],[60,17.44,287,406]
-      ]},
-      R134a: { table: [
-        [-50,0.29,122,367],[-40,0.51,137,372],[-30,0.84,151,379],[-20,1.33,167,386],
-        [-10,2.01,183,392],[0,2.93,200,399],[10,4.15,217,404],[20,5.72,236,409],
-        [30,7.70,254,414],[40,10.17,274,419],[50,13.18,294,422],[60,16.82,315,424]
-      ]},
-      R410A: { table: [[-40,1.8,140,400],[-20,4.0,170,415],[0,8.0,200,430],[20,14.5,240,440],[40,24.0,280,450]] },
-      R32: { table: [[-40,1.3,130,480],[-20,3.3,160,500],[0,7.1,200,520],[20,13.5,250,535],[40,23.5,300,545]] }
+    let huidigeKeuze = 0;
+
+    const berekeningen = {
+      1: {
+        titel: "1. Oververhitting (ΔT<sub>over</sub>)",
+        velden: [
+          { id: "tz", label: "T<sub>zuiggas</sub> of T<sub>persgas</sub> (°C)", placeholder: "bijv. 30" },
+          { id: "tevap", label: "T<sub>verdamping</sub> (°C)", placeholder: "bijv. -13" }
+        ],
+        bereken: (v) => {
+          const dT = v.tz - v.tevap;
+          return `
+            <div class="step">
+              <h3>Formule</h3>
+              <span class="formula">ΔT<sub>over</sub> = T<sub>zuiggas</sub> − T<sub>verdamping</sub></span>
+            </div>
+            <div class="step">
+              <h3>Invullen</h3>
+              ΔT<sub>over</sub> = ${v.tz} − (${v.tevap}) = <span class="value">${dT.toFixed(1)} K</span>
+              <div class="result-big">ΔT<sub>over</sub> = ${dT.toFixed(1)} K</div>
+              ${dT > 20 ? '<p style="color:#f87171;margin-top:8px;">Let op: dit is zeer hoog. Waarschijnlijk is dit de persgastemperatuur in plaats van de zuiggastemperatuur.</p>' : '<p style="color:#94a3b8;margin-top:8px;">Normale zuigoververhitting ligt meestal tussen 5 en 12 K.</p>'}
+            </div>`;
+        }
+      },
+      2: {
+        titel: "2. Onderkoeling (ΔT<sub>onder</sub>)",
+        velden: [
+          { id: "tcond", label: "T<sub>condensatie</sub> (°C)", placeholder: "bijv. 37" },
+          { id: "tvloe", label: "T<sub>vloeistof</sub> (°C)", placeholder: "bijv. 26" }
+        ],
+        bereken: (v) => {
+          const dT = v.tcond - v.tvloe;
+          return `
+            <div class="step">
+              <h3>Formule</h3>
+              <span class="formula">ΔT<sub>onder</sub> = T<sub>condensatie</sub> − T<sub>vloeistof</sub></span>
+            </div>
+            <div class="step">
+              <h3>Invullen</h3>
+              ΔT<sub>onder</sub> = ${v.tcond} − ${v.tvloe} = <span class="value">${dT.toFixed(1)} K</span>
+              <div class="result-big">ΔT<sub>onder</sub> = ${dT.toFixed(1)} K</div>
+            </div>`;
+        }
+      },
+      3: {
+        titel: "3. Specifiek koelvermogen (ε<sub>k</sub> / q₀)",
+        velden: [
+          { id: "h1", label: "h<sub>aanzuiging</sub> / h₁ (kJ/kg)", placeholder: "bijv. 410" },
+          { id: "h4", label: "h<sub>vloeistof</sub> / h₄ (kJ/kg)", placeholder: "bijv. 240" }
+        ],
+        bereken: (v) => {
+          const ek = v.h1 - v.h4;
+          return `
+            <div class="step">
+              <h3>Formule</h3>
+              <span class="formula">ε<sub>k</sub> = h<sub>aanzuiging</sub> − h<sub>vloeistof</sub> &nbsp; (= h₁ − h₄)</span>
+            </div>
+            <div class="step">
+              <h3>Invullen</h3>
+              ε<sub>k</sub> = ${v.h1} − ${v.h4} = <span class="value">${ek.toFixed(1)} kJ/kg</span>
+              <div class="result-big">ε<sub>k</sub> = ${ek.toFixed(1)} kJ/kg</div>
+            </div>`;
+        }
+      },
+      4: {
+        titel: "4. Specifiek condensorvermogen (ε<sub>w</sub> / q<sub>c</sub>)",
+        velden: [
+          { id: "h2", label: "h<sub>persgas</sub> / h₂ (kJ/kg)", placeholder: "bijv. 440" },
+          { id: "h3", label: "h<sub>vloeistof</sub> / h₃ (kJ/kg)", placeholder: "bijv. 240" }
+        ],
+        bereken: (v) => {
+          const ew = v.h2 - v.h3;
+          return `
+            <div class="step">
+              <h3>Formule</h3>
+              <span class="formula">ε<sub>w</sub> = h<sub>persgas</sub> − h<sub>vloeistof</sub> &nbsp; (= h₂ − h₃)</span>
+            </div>
+            <div class="step">
+              <h3>Invullen</h3>
+              ε<sub>w</sub> = ${v.h2} − ${v.h3} = <span class="value">${ew.toFixed(1)} kJ/kg</span>
+              <div class="result-big">ε<sub>w</sub> = ${ew.toFixed(1)} kJ/kg</div>
+            </div>`;
+        }
+      },
+      5: {
+        titel: "5. Specifieke compressorarbeid (Δh<sub>comp</sub> / w)",
+        velden: [
+          { id: "h2", label: "h<sub>persgas</sub> / h₂ (kJ/kg)", placeholder: "bijv. 440" },
+          { id: "h1", label: "h<sub>aanzuiging</sub> / h₁ (kJ/kg)", placeholder: "bijv. 410" }
+        ],
+        bereken: (v) => {
+          const w = v.h2 - v.h1;
+          return `
+            <div class="step">
+              <h3>Formule</h3>
+              <span class="formula">Δh<sub>comp</sub> = h<sub>persgas</sub> − h<sub>aanzuiging</sub> &nbsp; (= h₂ − h₁)</span>
+            </div>
+            <div class="step">
+              <h3>Invullen</h3>
+              Δh<sub>comp</sub> = ${v.h2} − ${v.h1} = <span class="value">${w.toFixed(1)} kJ/kg</span>
+              <div class="result-big">Δh<sub>comp</sub> = ${w.toFixed(1)} kJ/kg</div>
+            </div>`;
+        }
+      },
+      6: {
+        titel: "6. Koelfactor (EER)",
+        velden: [
+          { id: "ek", label: "ε<sub>k</sub> (kJ/kg)", placeholder: "bijv. 170" },
+          { id: "w", label: "Δh<sub>comp</sub> (kJ/kg)", placeholder: "bijv. 30" }
+        ],
+        bereken: (v) => {
+          const eer = v.ek / v.w;
+          return `
+            <div class="step">
+              <h3>Formule</h3>
+              <span class="formula">EER = ε<sub>k</sub> / Δh<sub>comp</sub></span>
+            </div>
+            <div class="step">
+              <h3>Invullen</h3>
+              EER = ${v.ek} / ${v.w} = <span class="value">${eer.toFixed(2)}</span>
+              <div class="result-big">EER = ${eer.toFixed(2)}</div>
+            </div>`;
+        }
+      },
+      7: {
+        titel: "7. Warmtefactor (COP)",
+        velden: [
+          { id: "ew", label: "ε<sub>w</sub> (kJ/kg)", placeholder: "bijv. 200" },
+          { id: "w", label: "Δh<sub>comp</sub> (kJ/kg)", placeholder: "bijv. 30" }
+        ],
+        bereken: (v) => {
+          const cop = v.ew / v.w;
+          return `
+            <div class="step">
+              <h3>Formule</h3>
+              <span class="formula">COP = ε<sub>w</sub> / Δh<sub>comp</sub></span>
+            </div>
+            <div class="step">
+              <h3>Invullen</h3>
+              COP = ${v.ew} / ${v.w} = <span class="value">${cop.toFixed(2)}</span>
+              <div class="result-big">COP = ${cop.toFixed(2)}</div>
+            </div>`;
+        }
+      },
+      8: {
+        titel: "8. Drukverhouding (π)",
+        velden: [
+          { id: "pc", label: "p<sub>condensatie</sub> abs (bar)", placeholder: "bijv. 9.7" },
+          { id: "pv", label: "p<sub>verdamping</sub> abs (bar)", placeholder: "bijv. 1.8" }
+        ],
+        bereken: (v) => {
+          const pi = v.pc / v.pv;
+          return `
+            <div class="step">
+              <h3>Formule</h3>
+              <span class="formula">π = p<sub>condensatie (abs)</sub> / p<sub>verdamping (abs)</sub></span>
+            </div>
+            <div class="step">
+              <h3>Invullen</h3>
+              π = ${v.pc} / ${v.pv} = <span class="value">${pi.toFixed(2)}</span>
+              <div class="result-big">π = ${pi.toFixed(2)}</div>
+              <p style="color:#94a3b8;margin-top:8px;">Typische waarden liggen tussen 3 en 8, afhankelijk van de toepassing.</p>
+            </div>`;
+        }
+      },
+      9: {
+        titel: "9. Massastroom (ṁ)",
+        velden: [
+          { id: "qcomp", label: "Q<sub>compressor</sub> (kW)", placeholder: "bijv. 1.34" },
+          { id: "w", label: "Δh<sub>comp</sub> (kJ/kg)", placeholder: "bijv. 30" }
+        ],
+        bereken: (v) => {
+          const m = v.qcomp / v.w;
+          return `
+            <div class="step">
+              <h3>Formule</h3>
+              <span class="formula">ṁ = Q<sub>compressor</sub> / Δh<sub>comp</sub></span>
+            </div>
+            <div class="step">
+              <h3>Invullen</h3>
+              ṁ = ${v.qcomp} / ${v.w} = <span class="value">${m.toFixed(4)} kg/s</span>
+              <div class="result-big">ṁ = ${m.toFixed(4)} kg/s</div>
+            </div>`;
+        }
+      },
+      10: {
+        titel: "10. Totaal koelvermogen (Q<sub>verdamper</sub>)",
+        velden: [
+          { id: "m", label: "Massastroom ṁ (kg/s)", placeholder: "bijv. 0.0447" },
+          { id: "ek", label: "ε<sub>k</sub> (kJ/kg)", placeholder: "bijv. 170" }
+        ],
+        bereken: (v) => {
+          const q = v.m * v.ek;
+          return `
+            <div class="step">
+              <h3>Formule</h3>
+              <span class="formula">Q<sub>verdamper</sub> = ṁ · ε<sub>k</sub></span>
+            </div>
+            <div class="step">
+              <h3>Invullen</h3>
+              Q<sub>verdamper</sub> = ${v.m} · ${v.ek} = <span class="value">${q.toFixed(2)} kW</span>
+              <div class="result-big">Q<sub>verdamper</sub> = ${q.toFixed(2)} kW</div>
+            </div>`;
+        }
+      },
+      11: {
+        titel: "11. Totaal condensorvermogen (Q<sub>condensor</sub>)",
+        velden: [
+          { id: "m", label: "Massastroom ṁ (kg/s)", placeholder: "bijv. 0.0447" },
+          { id: "ew", label: "ε<sub>w</sub> (kJ/kg)", placeholder: "bijv. 200" }
+        ],
+        bereken: (v) => {
+          const q = v.m * v.ew;
+          return `
+            <div class="step">
+              <h3>Formule</h3>
+              <span class="formula">Q<sub>condensor</sub> = ṁ · ε<sub>w</sub></span>
+            </div>
+            <div class="step">
+              <h3>Invullen</h3>
+              Q<sub>condensor</sub> = ${v.m} · ${v.ew} = <span class="value">${q.toFixed(2)} kW</span>
+              <div class="result-big">Q<sub>condensor</sub> = ${q.toFixed(2)} kW</div>
+            </div>`;
+        }
+      },
+      12: {
+        titel: "12. Complete set",
+        velden: [
+          { id: "tz", label: "T<sub>zuiggas</sub> / T<sub>persgas</sub> (°C)", placeholder: "30" },
+          { id: "tevap", label: "T<sub>verdamping</sub> (°C)", placeholder: "-13" },
+          { id: "tcond", label: "T<sub>condensatie</sub> (°C)", placeholder: "37" },
+          { id: "tvloe", label: "T<sub>vloeistof</sub> (°C)", placeholder: "26" },
+          { id: "h1", label: "h₁ aanzuiging (kJ/kg)", placeholder: "410" },
+          { id: "h2", label: "h₂ persgas (kJ/kg)", placeholder: "440" },
+          { id: "h3", label: "h₃ vloeistof (kJ/kg)", placeholder: "240" },
+          { id: "h4", label: "h₄ na expansie (kJ/kg)", placeholder: "240" },
+          { id: "qcomp", label: "Q<sub>compressor</sub> (kW)", placeholder: "1.34" },
+          { id: "pc", label: "p<sub>c</sub> abs (bar)", placeholder: "9.7" },
+          { id: "pv", label: "p<sub>v</sub> abs (bar)", placeholder: "1.8" }
+        ],
+        bereken: (v) => {
+          const dTover = v.tz - v.tevap;
+          const dTonder = v.tcond - v.tvloe;
+          const ek = v.h1 - v.h4;
+          const ew = v.h2 - v.h3;
+          const w = v.h2 - v.h1;
+          const eer = ek / w;
+          const cop = ew / w;
+          const pi = v.pc / v.pv;
+          const m = v.qcomp / w;
+          const qverd = m * ek;
+          const qcond = m * ew;
+
+          return `
+            <div class="step"><h3>1. Oververhitting</h3>
+              ΔT<sub>over</sub> = ${v.tz} − (${v.tevap}) = <span class="value">${dTover.toFixed(1)} K</span></div>
+            <div class="step"><h3>2. Onderkoeling</h3>
+              ΔT<sub>onder</sub> = ${v.tcond} − ${v.tvloe} = <span class="value">${dTonder.toFixed(1)} K</span></div>
+            <div class="step"><h3>3. Specifiek koelvermogen ε<sub>k</sub></h3>
+              ε<sub>k</sub> = ${v.h1} − ${v.h4} = <span class="value">${ek.toFixed(1)} kJ/kg</span></div>
+            <div class="step"><h3>4. Specifiek condensorvermogen ε<sub>w</sub></h3>
+              ε<sub>w</sub> = ${v.h2} − ${v.h3} = <span class="value">${ew.toFixed(1)} kJ/kg</span></div>
+            <div class="step"><h3>5. Specifieke compressorarbeid</h3>
+              Δh<sub>comp</sub> = ${v.h2} − ${v.h1} = <span class="value">${w.toFixed(1)} kJ/kg</span></div>
+            <div class="step"><h3>6. EER</h3>
+              EER = ${ek.toFixed(1)} / ${w.toFixed(1)} = <span class="value">${eer.toFixed(2)}</span></div>
+            <div class="step"><h3>7. COP</h3>
+              COP = ${ew.toFixed(1)} / ${w.toFixed(1)} = <span class="value">${cop.toFixed(2)}</span>
+              <div class="result-big">COP = ${cop.toFixed(2)}</div></div>
+            <div class="step"><h3>8. Drukverhouding</h3>
+              π = ${v.pc} / ${v.pv} = <span class="value">${pi.toFixed(2)}</span></div>
+            <div class="step"><h3>9. Massastroom</h3>
+              ṁ = ${v.qcomp} / ${w.toFixed(1)} = <span class="value">${m.toFixed(4)} kg/s</span></div>
+            <div class="step"><h3>10. Q<sub>verdamper</sub></h3>
+              Q<sub>verdamper</sub> = ${m.toFixed(4)} · ${ek.toFixed(1)} = <span class="value">${qverd.toFixed(2)} kW</span></div>
+            <div class="step"><h3>11. Q<sub>condensor</sub></h3>
+              Q<sub>condensor</sub> = ${m.toFixed(4)} · ${ew.toFixed(1)} = <span class="value">${qcond.toFixed(2)} kW</span></div>`;
+        }
+      }
     };
 
-    function interp(table, T) {
-      if (T <= table[0][0]) return {P:table[0][1], hf:table[0][2], hg:table[0][3]};
-      if (T >= table[table.length-1][0]) return {P:table[table.length-1][1], hf:table[table.length-1][2], hg:table[table.length-1][3]};
-      for (let i=0; i<table.length-1; i++) {
-        const t1=table[i][0], t2=table[i+1][0];
-        if (T>=t1 && T<=t2) {
-          const f=(T-t1)/(t2-t1);
-          return { P: table[i][1]+f*(table[i+1][1]-table[i][1]),
-                   hf: table[i][2]+f*(table[i+1][2]-table[i][2]),
-                   hg: table[i][3]+f*(table[i+1][3]-table[i][3]) };
-        }
-      }
+    function kies(nr) {
+      huidigeKeuze = nr;
+      const b = berekeningen[nr];
+      document.getElementById('menuCard').classList.add('hidden');
+      document.getElementById('resultCard').classList.add('hidden');
+      document.getElementById('inputCard').classList.remove('hidden');
+      document.getElementById('inputTitel').innerHTML = b.titel;
+
+      let html = '';
+      b.velden.forEach(veld => {
+        html += `<label>${veld.label}</label>
+                 <input type="number" id="${veld.id}" step="any" placeholder="${veld.placeholder || ''}">`;
+      });
+      document.getElementById('inputVelden').innerHTML = html;
     }
 
-    // Zoek T bij gegeven P (omgekeerde interpolatie)
-    function TfromP(table, P) {
-      if (P <= table[0][1]) return table[0][0];
-      if (P >= table[table.length-1][1]) return table[table.length-1][0];
-      for (let i=0; i<table.length-1; i++) {
-        const p1=table[i][1], p2=table[i+1][1];
-        if (P>=p1 && P<=p2) {
-          const f=(P-p1)/(p2-p1);
-          return table[i][0] + f*(table[i+1][0]-table[i][0]);
-        }
-      }
-      return 0;
-    }
+    function uitvoeren() {
+      const b = berekeningen[huidigeKeuze];
+      const waarden = {};
+      let ontbreekt = false;
 
-    function bereken() {
-      const ref = document.getElementById('refrigerant').value;
-      const tab = data[ref].table;
-
-      let Te, Tc, Pe, Pc;
-
-      // Druk of temperatuur gebruiken
-      const pvIn = parseFloat(document.getElementById('pv').value);
-      const pcIn = parseFloat(document.getElementById('pc').value);
-
-      if (!isNaN(pvIn) && pvIn > 0) {
-        Pe = pvIn;
-        Te = TfromP(tab, Pe);
-      } else {
-        Te = parseFloat(document.getElementById('tevap').value);
-        Pe = interp(tab, Te).P;
-      }
-
-      if (!isNaN(pcIn) && pcIn > 0) {
-        Pc = pcIn;
-        Tc = TfromP(tab, Pc);
-      } else {
-        Tc = parseFloat(document.getElementById('tcond').value);
-        Pc = interp(tab, Tc).P;
-      }
-
-      const Tz = parseFloat(document.getElementById('tz').value);
-      const Tvloe = parseFloat(document.getElementById('tvloe').value);
-      const Qcomp = parseFloat(document.getElementById('qcomp').value);
-      const eta = parseFloat(document.getElementById('eta').value) || 0.7;
-
-      // Verzadigingsenthalpieën
-      const satE = interp(tab, Te);
-      const satC = interp(tab, Tc);
-
-      // Oververhitting & onderkoeling (gemeten)
-      const dT_over = Tz - Te;
-      const dT_onder = Tc - Tvloe;
-
-      // Enthalpieën (eenvoudige maar bruikbare schatting)
-      // h1 = verzadigde damp + oververhitting * cp
-      let h1 = satE.hg + Math.max(dT_over, 0) * 1.0;
-      // h3 = verzadigde vloeistof - onderkoeling * cp
-      let h3 = satC.hf - Math.max(dT_onder, 0) * 1.4;
-      let h4 = h3; // isenthalpische expansie
-
-      // Compressie
-      let h2s = h1 + (Tc - Te) * 0.9 + 12;
-      let h2 = h1 + (h2s - h1) / eta;
-
-      // Specifieke factoren (zoals op schoolbord)
-      const ek = h1 - h4;          // koelfactor / εk
-      const ew = h2 - h3;          // warmtefactor / εw  (of soms h2-h4)
-      const dh_comp = h2 - h1;     // compressorarbeid
-
-      const COP = ew / dh_comp;
-      const EER = ek / dh_comp;
-
-      let m = null, Qcond = null, Qverd = null;
-      if (!isNaN(Qcomp) && Qcomp > 0 && dh_comp > 0) {
-        m = Qcomp / dh_comp;
-        Qcond = m * ew;
-        Qverd = m * ek;
-      }
-
-      // ===== Resultaten opbouwen =====
-      const stappen = document.getElementById('stappen');
-      stappen.innerHTML = '';
-
-      function addStep(title, html) {
-        const div = document.createElement('div');
-        div.className = 'step';
-        div.innerHTML = `<h3>${title}</h3>${html}`;
-        stappen.appendChild(div);
-      }
-
-      // Altijd basis info
-      addStep('0. Gebruikte verzadigingstemperaturen',
-        `Verdamping: <span class="value">${Te.toFixed(1)} °C</span> (P<sub>v</sub> ≈ ${Pe.toFixed(2)} bar)<br>
-         Condensatie: <span class="value">${Tc.toFixed(1)} °C</span> (P<sub>c</sub> ≈ ${Pc.toFixed(2)} bar)`);
-
-      if (document.getElementById('chk_over').checked) {
-        addStep('1. Oververhitting (ΔT<sub>over</sub>)',
-          `Formule: <span class="formula">ΔT<sub>over</sub> = T<sub>z</sub> − T<sub>verdamping</sub></span><br>
-           = ${Tz} − (${Te.toFixed(1)}) = <span class="value">${dT_over.toFixed(1)} K</span><br>
-           ${dT_over > 20 ? '<span style="color:#f87171">Let op: zeer hoge oververhitting → waarschijnlijk is T<sub>z</sub> de persgastemperatuur.</span>' : 'Normale zuigoververhitting ligt meestal tussen 5–12 K.'}`);
-      }
-
-      if (document.getElementById('chk_onder').checked) {
-        addStep('2. Onderkoeling (ΔT<sub>onder</sub>)',
-          `Formule: <span class="formula">ΔT<sub>onder</sub> = T<sub>condensatie</sub> − T<sub>vloeistof</sub></span><br>
-           = ${Tc.toFixed(1)} − ${Tvloe} = <span class="value">${dT_onder.toFixed(1)} K</span>`);
-      }
-
-      if (document.getElementById('chk_ek').checked || document.getElementById('chk_ew').checked) {
-        addStep('3. Enthalpieën (kJ/kg)',
-          `h<sub>1</sub> (na verdamper / aanzuiging) ≈ <span class="value">${h1.toFixed(1)}</span><br>
-           h<sub>2</sub> (na compressor) ≈ <span class="value">${h2.toFixed(1)}</span><br>
-           h<sub>3</sub> (na condensor / vloeistof) ≈ <span class="value">${h3.toFixed(1)}</span><br>
-           h<sub>4</sub> = h<sub>3</sub> (expansie) ≈ <span class="value">${h4.toFixed(1)}</span>`);
-      }
-
-      if (document.getElementById('chk_ek').checked) {
-        addStep('4. ε<sub>k</sub> – Koelfactor (specifiek koelvermogen)',
-          `Formule: <span class="formula">ε<sub>k</sub> = h<sub>1</sub> − h<sub>4</sub></span><br>
-           = ${h1.toFixed(1)} − ${h4.toFixed(1)} = <span class="value">${ek.toFixed(1)} kJ/kg</span>`);
-      }
-
-      if (document.getElementById('chk_ew').checked) {
-        addStep('5. ε<sub>w</sub> – Warmtefactor',
-          `Formule: <span class="formula">ε<sub>w</sub> = h<sub>2</sub> − h<sub>3</sub></span><br>
-           = ${h2.toFixed(1)} − ${h3.toFixed(1)} = <span class="value">${ew.toFixed(1)} kJ/kg</span>`);
-      }
-
-      if (document.getElementById('chk_cop').checked) {
-        addStep('6. COP en EER',
-          `Compressorarbeid Δh<sub>comp</sub> = h<sub>2</sub> − h<sub>1</sub> = <span class="value">${dh_comp.toFixed(1)} kJ/kg</span><br><br>
-           <span class="formula">COP = ε<sub>w</sub> / Δh<sub>comp</sub></span> = ${ew.toFixed(1)} / ${dh_comp.toFixed(1)} = <span class="cop-big">${COP.toFixed(2)}</span><br>
-           <span class="formula">EER = ε<sub>k</sub> / Δh<sub>comp</sub></span> = ${ek.toFixed(1)} / ${dh_comp.toFixed(1)} = <span class="value">${EER.toFixed(2)}</span>`);
-      }
-
-      if (document.getElementById('chk_m').checked) {
-        if (m !== null) {
-          addStep('7. Massastroom m',
-            `Formule: <span class="formula">m = Q<sub>comp</sub> / Δh<sub>comp</sub></span><br>
-             = ${Qcomp} / ${dh_comp.toFixed(1)} = <span class="value">${m.toFixed(4)} kg/s</span>`);
+      b.velden.forEach(veld => {
+        const el = document.getElementById(veld.id);
+        const val = parseFloat(el.value);
+        if (isNaN(val)) {
+          el.style.borderColor = '#f87171';
+          ontbreekt = true;
         } else {
-          addStep('7. Massastroom m', 'Vul Q<sub>comp</sub> in om de massastroom te berekenen.');
+          el.style.borderColor = '#475569';
+          waarden[veld.id] = val;
         }
-      }
-
-      if (document.getElementById('chk_q').checked) {
-        if (Qcond !== null) {
-          addStep('8. Vermogens',
-            `Q<sub>condensor</sub> = m × ε<sub>w</sub> = ${m.toFixed(4)} × ${ew.toFixed(1)} = <span class="value">${Qcond.toFixed(2)} kW</span><br>
-             Q<sub>verdamper</sub> = m × ε<sub>k</sub> = ${m.toFixed(4)} × ${ek.toFixed(1)} = <span class="value">${Qverd.toFixed(2)} kW</span>`);
-        } else {
-          addStep('8. Vermogens', 'Vul Q<sub>comp</sub> in om de vermogens te berekenen.');
-        }
-      }
-
-      document.getElementById('resultsCard').style.display = 'block';
-
-      // Diagram
-      if (document.getElementById('chk_diagram').checked) {
-        document.getElementById('diagramCard').style.display = 'block';
-        tekenDiagram(tab, Te, Tc, h1, h2, h3, h4, Pe, Pc, ref);
-      } else {
-        document.getElementById('diagramCard').style.display = 'none';
-      }
-    }
-
-    function tekenDiagram(table, Te, Tc, h1, h2, h3, h4, Pe, Pc, ref) {
-      const canvas = document.getElementById('phCanvas');
-      const ctx = canvas.getContext('2d');
-      const W = canvas.width, H = canvas.height;
-      ctx.clearRect(0,0,W,H);
-
-      const hMin=100, hMax=480, pMin=0.25, pMax=35;
-      function x(h){ return 60 + (h-hMin)/(hMax-hMin)*(W-90); }
-      function y(p){
-        const lp=Math.log10(Math.max(p,0.1));
-        return H-45 - (lp-Math.log10(pMin))/(Math.log10(pMax)-Math.log10(pMin))*(H-80);
-      }
-
-      // Grid
-      ctx.strokeStyle='#1e293b'; ctx.lineWidth=1;
-      for(let h=150;h<=450;h+=50){ ctx.beginPath(); ctx.moveTo(x(h),25); ctx.lineTo(x(h),H-45); ctx.stroke(); }
-
-      // Isothermen
-      const isos=[-30,-10,10,30,50];
-      isos.forEach((T,i)=>{
-        const sat=interp(table,T);
-        ctx.strokeStyle=`hsla(${250+i*30},65%,65%,0.5)`;
-        ctx.lineWidth=1.1;
-        ctx.beginPath();
-        ctx.moveTo(x(sat.hf-30), y(sat.P*1.6));
-        ctx.lineTo(x(sat.hf), y(sat.P));
-        ctx.lineTo(x(sat.hg), y(sat.P));
-        for(let j=1;j<=7;j++) ctx.lineTo(x(sat.hg+j*16), y(sat.P*Math.pow(1.22,j)));
-        ctx.stroke();
       });
 
-      // Dampkoepel
-      ctx.beginPath(); ctx.strokeStyle='#38bdf8'; ctx.lineWidth=2.8;
-      table.forEach((pt,i)=>{ const xx=x(pt[2]),yy=y(pt[1]); i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy); });
-      ctx.stroke();
-      ctx.beginPath(); ctx.strokeStyle='#f472b6'; ctx.lineWidth=2.8;
-      table.forEach((pt,i)=>{ const xx=x(pt[3]),yy=y(pt[1]); i?ctx.lineTo(xx,yy):ctx.moveTo(xx,yy); });
-      ctx.stroke();
+      if (ontbreekt) {
+        alert('Vul alle gevraagde gegevens in.');
+        return;
+      }
 
-      // Cyclus
-      ctx.strokeStyle='#4ade80'; ctx.lineWidth=3.2;
-      ctx.beginPath(); ctx.moveTo(x(h4),y(Pe)); ctx.lineTo(x(h1),y(Pe)); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(x(h1),y(Pe)); ctx.lineTo(x(h2),y(Pc)); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(x(h2),y(Pc)); ctx.lineTo(x(h3),y(Pc)); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(x(h3),y(Pc)); ctx.lineTo(x(h4),y(Pe)); ctx.stroke();
-
-      // Punten
-      [{h:h1,p:Pe,l:'1'},{h:h2,p:Pc,l:'2'},{h:h3,p:Pc,l:'3'},{h:h4,p:Pe,l:'4'}].forEach(pt=>{
-        ctx.beginPath(); ctx.fillStyle='#fbbf24'; ctx.arc(x(pt.h),y(pt.p),7,0,Math.PI*2); ctx.fill();
-        ctx.fillStyle='#0f172a'; ctx.font='bold 12px system-ui'; ctx.fillText(pt.l, x(pt.h)-3.5, y(pt.p)+4);
-      });
-
-      ctx.fillStyle='#94a3b8'; ctx.font='12px system-ui';
-      ctx.fillText('Enthalpie (kJ/kg)', W/2-40, H-12);
-      ctx.save(); ctx.translate(16,H/2+30); ctx.rotate(-Math.PI/2);
-      ctx.fillText('Druk (bar abs) – log',0,0); ctx.restore();
-      ctx.fillStyle='#38bdf8'; ctx.font='bold 13px system-ui'; ctx.fillText(ref, W-90, 28);
+      document.getElementById('inputCard').classList.add('hidden');
+      document.getElementById('resultCard').classList.remove('hidden');
+      document.getElementById('resultaat').innerHTML = b.bereken(waarden);
     }
 
-    // Start met voorbeeld van het bord
-    bereken();
+    function terug() {
+      document.getElementById('menuCard').classList.remove('hidden');
+      document.getElementById('inputCard').classList.add('hidden');
+      document.getElementById('resultCard').classList.add('hidden');
+    }
   </script>
 </body>
 </html>
