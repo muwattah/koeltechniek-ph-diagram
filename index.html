@@ -49,7 +49,6 @@
   <div class="container">
     <h1>Koeltechniek – Categorie 1</h1>
     <p class="subtitle">Kies een berekening → vul alleen basisgegevens in → alles wordt automatisch berekend</p>
-
     <div class="card" id="menuCard">
       <h2>Welke berekening wil je uitvoeren?</h2>
       <button class="menu-btn" onclick="kies(1)">1. Oververhitting (ΔT<sub>over</sub>)</button>
@@ -66,14 +65,12 @@
       <button class="menu-btn" onclick="kies(12)" style="border-color:#0ea5e9;color:#38bdf8;">12. Complete set (volledige koelcyclus + p-h diagram) ★</button>
       <button class="menu-btn" onclick="toonValidatie()" style="margin-top:10px;border-color:#a78bfa;color:#a78bfa;">▶ Validatie vs CoolProp (referentietests)</button>
     </div>
-
     <div class="card hidden" id="inputCard">
       <h2 id="inputTitel">Gegevens</h2>
       <div id="inputVelden"></div>
       <button class="calc" onclick="uitvoeren()">Bereken</button>
       <button class="back" onclick="terug()">← Terug naar menu</button>
     </div>
-
     <div class="card hidden" id="resultCard">
       <h2>Stap-voor-stap uitwerking</h2>
       <div id="resultaat"></div>
@@ -89,13 +86,9 @@
       <button class="back" onclick="terug()">← Nieuwe berekening</button>
     </div>
   </div>
-
   <script src="data_sat.js"></script>
   <script src="data_ref.js"></script>
-  <script src="sh_R134a_med.js"></script>
-  <script src="sh_R513A_med.js"></script>
-  <script src="sh_R410A_med.js"></script>
-  <script src="sh_R32_med.js"></script>
+  <script src="sh_all_sparse.js"></script>
   <script src="sc_R134a.js"></script>
   <script src="sc_R513A.js"></script>
   <script src="sc_R410A.js"></script>
