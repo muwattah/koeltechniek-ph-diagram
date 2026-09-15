@@ -1,4 +1,3 @@
-
 var SH_GRID = window.SH_GRID || {};
 var SC_GRID = window.SC_GRID || {};
 
@@ -27,46 +26,70 @@ function TfromP(ref,P) {
   }
   return null;
 }
-function interpT(pts,T) {
-  if(T<=pts[0][0]) return {h:pts[0][1],s:pts[0][2]};
-  if(T>=pts[pts.length-1][0]) return {h:pts[pts.length-1][1],s:pts[pts.length-1][2]};
-  for(let i=0;i<pts.length-1;i++) {
+function interpT(pts,T,allowClamp) {
+  const margin = 0.05;
+  if (T < pts[0][0] - margin) return null;
+  if (T > pts[pts.length-1][0] + margin) {
+    if (allowClamp) return {h:pts[pts.length-1][1],s:pts[pts.length-1][2]};
+    return null;
+  }
+  if (T <= pts[0][0]) return {h:pts[0][1],s:pts[0][2]};
+  if (T >= pts[pts.length-1][0]) return {h:pts[pts.length-1][1],s:pts[pts.length-1][2]};
+  for (let i=0;i<pts.length-1;i++) {
     const t1=pts[i][0],t2=pts[i+1][0];
-    if(T>=t1&&T<=t2){const f=t2===t1?0:(T-t1)/(t2-t1); return {h:pts[i][1]+f*(pts[i+1][1]-pts[i][1]),s:pts[i][2]+f*(pts[i+1][2]-pts[i][2])};}
+    if (T>=t1 && T<=t2) {
+      const f = t2===t1 ? 0 : (T-t1)/(t2-t1);
+      return {h:pts[i][1]+f*(pts[i+1][1]-pts[i][1]), s:pts[i][2]+f*(pts[i+1][2]-pts[i][2])};
+    }
   }
   return null;
 }
-function interpHS(grid,P,T) {
-  if(!grid||!grid.length) return null;
-  if(P<=grid[0].P) return interpT(grid[0].pts,T);
-  if(P>=grid[grid.length-1].P) return interpT(grid[grid.length-1].pts,T);
-  for(let i=0;i<grid.length-1;i++) {
-    const p1=grid[i].P,p2=grid[i+1].P;
-    if(P>=p1&&P<=p2){const f=p2===p1?0:(P-p1)/(p2-p1); const r1=interpT(grid[i].pts,T),r2=interpT(grid[i+1].pts,T);
-      if(!r1||!r2) return r1||r2; return {h:r1.h+f*(r2.h-r1.h),s:r1.s+f*(r2.s-r1.s)};}
+function interpHS(grid,P,T,allowClamp) {
+  if (!grid || !grid.length) return null;
+  const marginP = 0.15;
+  if (P < grid[0].P - marginP || P > grid[grid.length-1].P + marginP) return null;
+  if (P <= grid[0].P) return interpT(grid[0].pts, T, allowClamp);
+  if (P >= grid[grid.length-1].P) return interpT(grid[grid.length-1].pts, T, allowClamp);
+  for (let i=0;i<grid.length-1;i++) {
+    const p1=grid[i].P, p2=grid[i+1].P;
+    if (P>=p1 && P<=p2) {
+      const f = p2===p1 ? 0 : (P-p1)/(p2-p1);
+      const r1 = interpT(grid[i].pts, T, allowClamp), r2 = interpT(grid[i+1].pts, T, allowClamp);
+      if (!r1 || !r2) return null;
+      return {h:r1.h+f*(r2.h-r1.h), s:r1.s+f*(r2.s-r1.s)};
+    }
   }
   return null;
 }
 function findHsOnIsobar(pts,sTarget) {
-  const sorted=pts.slice().sort((a,b)=>a[2]-b[2]);
-  if(sTarget<=sorted[0][2]) return {h:sorted[0][1],T:sorted[0][0],s:sorted[0][2]};
-  if(sTarget>=sorted[sorted.length-1][2]) return {h:sorted[sorted.length-1][1],T:sorted[sorted.length-1][0],s:sorted[sorted.length-1][2]};
-  for(let i=0;i<sorted.length-1;i++) {
-    const s1=sorted[i][2],s2=sorted[i+1][2];
-    if(sTarget>=s1&&sTarget<=s2){const f=s2===s1?0:(sTarget-s1)/(s2-s1);
-      return {h:sorted[i][1]+f*(sorted[i+1][1]-sorted[i][1]),T:sorted[i][0]+f*(sorted[i+1][0]-sorted[i][0]),s:sTarget};}
+  const sorted = pts.slice().sort((a,b)=>a[2]-b[2]);
+  const marginS = 0.0005;
+  if (sTarget < sorted[0][2] - marginS || sTarget > sorted[sorted.length-1][2] + marginS) return null;
+  if (sTarget <= sorted[0][2]) return {h:sorted[0][1],T:sorted[0][0],s:sorted[0][2]};
+  if (sTarget >= sorted[sorted.length-1][2]) return {h:sorted[sorted.length-1][1],T:sorted[sorted.length-1][0],s:sorted[sorted.length-1][2]};
+  for (let i=0;i<sorted.length-1;i++) {
+    const s1=sorted[i][2], s2=sorted[i+1][2];
+    if (sTarget>=s1 && sTarget<=s2) {
+      const f = s2===s1 ? 0 : (sTarget-s1)/(s2-s1);
+      return {h:sorted[i][1]+f*(sorted[i+1][1]-sorted[i][1]), T:sorted[i][0]+f*(sorted[i+1][0]-sorted[i][0]), s:sTarget};
+    }
   }
   return null;
 }
 function findHAtS(grid,P,sTarget) {
-  if(!grid||!grid.length) return null;
-  if(P<=grid[0].P) return findHsOnIsobar(grid[0].pts,sTarget);
-  if(P>=grid[grid.length-1].P) return findHsOnIsobar(grid[grid.length-1].pts,sTarget);
-  for(let i=0;i<grid.length-1;i++) {
-    const p1=grid[i].P,p2=grid[i+1].P;
-    if(P>=p1&&P<=p2){const f=p2===p1?0:(P-p1)/(p2-p1);
-      const r1=findHsOnIsobar(grid[i].pts,sTarget),r2=findHsOnIsobar(grid[i+1].pts,sTarget);
-      if(!r1||!r2) return r1||r2; return {h:r1.h+f*(r2.h-r1.h),T:r1.T+f*(r2.T-r1.T),s:sTarget};}
+  if (!grid || !grid.length) return null;
+  const marginP = 0.15;
+  if (P < grid[0].P - marginP || P > grid[grid.length-1].P + marginP) return null;
+  if (P <= grid[0].P) return findHsOnIsobar(grid[0].pts, sTarget);
+  if (P >= grid[grid.length-1].P) return findHsOnIsobar(grid[grid.length-1].pts, sTarget);
+  for (let i=0;i<grid.length-1;i++) {
+    const p1=grid[i].P, p2=grid[i+1].P;
+    if (P>=p1 && P<=p2) {
+      const f = p2===p1 ? 0 : (P-p1)/(p2-p1);
+      const r1 = findHsOnIsobar(grid[i].pts, sTarget), r2 = findHsOnIsobar(grid[i+1].pts, sTarget);
+      if (!r1 || !r2) return null;
+      return {h:r1.h+f*(r2.h-r1.h), T:r1.T+f*(r2.T-r1.T), s:sTarget};
+    }
   }
   return null;
 }
@@ -81,11 +104,11 @@ function berekenCyclus(inp) {
   if(inp.Tzuig!==undefined&&!isNaN(inp.Tzuig)) SH=inp.Tzuig-Te;
   if(inp.Tvloe!==undefined&&!isNaN(inp.Tvloe)) SC=Tc-inp.Tvloe;
   const T1=Te+Math.max(SH,0);
-  const r1=interpHS(SH_GRID[ref],Pe,T1);
+  const r1=interpHS(SH_GRID[ref],Pe,T1,false);
   if(!r1) return{error:'Geen superheat-data voor toestand 1.'};
   const h1=r1.h,s1=r1.s;
   const T3=Tc-Math.max(SC,0);
-  const r3=interpHS(SC_GRID[ref],Pc,T3);
+  const r3=interpHS(SC_GRID[ref],Pc,T3,true);
   if(!r3) return{error:'Geen subcool-data voor toestand 3.'};
   const h3=r3.h,h4=h3;
   const r2s=findHAtS(SH_GRID[ref],Pc,s1);
@@ -125,15 +148,21 @@ function valideer(r){
   return f;
 }
 function pct(calc,ref){if(!ref||Math.abs(ref)<1e-9)return'—';return((calc-ref)/Math.abs(ref)*100).toFixed(2)+'%';}
+function pctNum(calc,ref){if(!ref||Math.abs(ref)<1e-9)return 0;return (calc-ref)/Math.abs(ref)*100;}
 function runValidation(){
   const byRef={};
   for(const t of (typeof REF!=='undefined'?REF:[])){
     const r=berekenCyclus({ref:t.ref,Te:t.Te,Tc:t.Tc,Tzuig:t.Te+t.SH,Tvloe:t.Tc-t.SC,eta:t.eta});
     if(!byRef[t.ref]) byRef[t.ref]=[];
-    if(r.error){byRef[t.ref].push({...t,error:r.error});continue;}
+    if(r.error){byRef[t.ref].push({...t,error:r.error,pass:false});continue;}
+    const dCOP = pctNum(r.COP_R, t.COP);
+    const dw = pctNum(r.w, t.w);
+    const pass = Math.abs(dCOP) < 2.0 && Math.abs(dw) < 2.0;
     byRef[t.ref].push({Te:t.Te,Tc:t.Tc,SH:t.SH,SC:t.SC,eta:t.eta,
       dh1:pct(r.h1,t.h1),dh2s:pct(r.h2s,t.h2s),dh2:pct(r.h2,t.h2),dh3:pct(r.h3,t.h3),
-      dq0:pct(r.q0,t.q0),dw:pct(r.w,t.w),dCOP:pct(r.COP_R,t.COP)});
+      dq0:pct(r.q0,t.q0),dw:pct(r.w,t.w),dCOP:pct(r.COP_R,t.COP),
+      dCOP_n:dCOP, dw_n:dw, pass:pass,
+      h1c:r.h1, h2sc:r.h2s, h2c:r.h2, h3c:r.h3, q0c:r.q0, wc:r.w, COPc:r.COP_R});
   }
   return byRef;
 }
