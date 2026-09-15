@@ -15,12 +15,10 @@
     .menu-btn { display: block; width: 100%; text-align: left; padding: 10px 14px; margin-bottom: 6px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 0.9rem; cursor: pointer; transition: all 0.15s; }
     .menu-btn:hover { background: #1e293b; border-color: #0ea5e9; color: #38bdf8; }
     label { display: block; margin-bottom: 3px; font-size: 0.8rem; color: #94a3b8; }
-    .hint { font-size: 0.72rem; color: #64748b; margin-bottom: 5px; }
     input, select { width: 100%; padding: 9px 11px; margin-bottom: 11px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #e2e8f0; font-size: 0.92rem; }
     button.calc { width: 100%; padding: 12px; background: #0ea5e9; color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
     button.calc:hover { background: #0284c7; }
     button.back { background: transparent; border: 1px solid #475569; color: #94a3b8; padding: 9px; border-radius: 8px; width: 100%; margin-top: 10px; cursor: pointer; }
-    button.back:hover { border-color: #94a3b8; color: #e2e8f0; }
     .step { background: #0f172a; border-radius: 8px; padding: 11px 13px; margin-bottom: 9px; border-left: 4px solid #0ea5e9; }
     .step h3 { color: #38bdf8; font-size: 0.88rem; margin-bottom: 5px; }
     .formula { font-family: ui-monospace, monospace; background: #1e293b; padding: 2px 5px; border-radius: 4px; color: #4ade80; font-size: 0.84rem; }
@@ -39,7 +37,6 @@
   <div class="container">
     <h1>Koeltechniek – Categorie 1</h1>
     <p class="subtitle">2D CoolProp property-engine · Kies berekening → vul basisgegevens in</p>
-
     <div class="card" id="menuCard">
       <h2>Welke berekening?</h2>
       <button class="menu-btn" onclick="kies(1)">1. Oververhitting (ΔT<sub>over</sub>)</button>
@@ -56,14 +53,12 @@
       <button class="menu-btn" onclick="kies(12)" style="border-color:#0ea5e9;color:#38bdf8;">12. Complete set (volledige koelcyclus + p-h diagram) ★</button>
       <button class="menu-btn" onclick="toonValidatie()" style="margin-top:10px;border-color:#a78bfa;color:#a78bfa;">▶ Validatie vs CoolProp (80 referentietests)</button>
     </div>
-
     <div class="card hidden" id="inputCard">
       <h2 id="inputTitel">Gegevens</h2>
       <div id="inputVelden"></div>
       <button class="calc" onclick="uitvoeren()">Bereken</button>
       <button class="back" onclick="terug()">← Terug naar menu</button>
     </div>
-
     <div class="card hidden" id="resultCard">
       <h2>Stap-voor-stap uitwerking</h2>
       <div id="resultaat"></div>
@@ -79,9 +74,12 @@
       <button class="back" onclick="terug()">← Nieuwe berekening</button>
     </div>
   </div>
-
   <script src="data_sat.js"></script>
-  <script src="data_ref.js"></script>
+  <script src="ref_R134a.js"></script>
+  <script src="ref_R513A.js"></script>
+  <script src="ref_R410A.js"></script>
+  <script src="ref_R32.js"></script>
+  <script src="data_ref_loader.js"></script>
   <script src="sh_sparse_a.js"></script>
   <script src="sh_sparse_b.js"></script>
   <script src="sc_R134a.js"></script>
@@ -89,7 +87,7 @@
   <script src="sc_R410A.js"></script>
   <script src="sc_R32.js"></script>
   <script src="data_grids_loader.js"></script>
-  <script src="app_p1.js"></script>
-  <script src="app_p2.js"></script>
+  <script src="app_core.js"></script>
+  <script src="app_ui.js"></script>
 </body>
 </html>
