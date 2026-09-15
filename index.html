@@ -1,100 +1,86 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Koeltechniek Categorie 1 – Calculator</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, -apple-system, sans-serif; background: #0f172a; color: #e2e8f0; line-height: 1.5; }
-    .container { max-width: 1000px; margin: 0 auto; padding: 16px; }
-    h1 { text-align: center; color: #38bdf8; margin-bottom: 4px; font-size: 1.4rem; }
-    .subtitle { text-align: center; color: #94a3b8; margin-bottom: 18px; font-size: 0.88rem; }
-    .card { background: #1e293b; border-radius: 12px; padding: 18px; border: 1px solid #334155; margin-bottom: 14px; }
-    h2 { color: #38bdf8; font-size: 1.05rem; margin-bottom: 12px; }
-    .menu-btn { display: block; width: 100%; text-align: left; padding: 10px 14px; margin-bottom: 6px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 0.9rem; cursor: pointer; transition: all 0.15s; }
-    .menu-btn:hover { background: #1e293b; border-color: #0ea5e9; color: #38bdf8; }
-    label { display: block; margin-bottom: 3px; font-size: 0.8rem; color: #94a3b8; }
-    .hint { font-size: 0.72rem; color: #64748b; margin-bottom: 5px; }
-    input, select { width: 100%; padding: 9px 11px; margin-bottom: 11px; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: #e2e8f0; font-size: 0.92rem; }
-    button.calc { width: 100%; padding: 12px; background: #0ea5e9; color: white; border: none; border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer; }
-    button.calc:hover { background: #0284c7; }
-    button.back { background: transparent; border: 1px solid #475569; color: #94a3b8; padding: 9px; border-radius: 8px; width: 100%; margin-top: 10px; cursor: pointer; }
-    button.back:hover { border-color: #94a3b8; color: #e2e8f0; }
-    .step { background: #0f172a; border-radius: 8px; padding: 11px 13px; margin-bottom: 9px; border-left: 4px solid #0ea5e9; }
-    .step h3 { color: #38bdf8; font-size: 0.88rem; margin-bottom: 5px; }
-    .formula { font-family: ui-monospace, monospace; background: #1e293b; padding: 2px 5px; border-radius: 4px; color: #4ade80; font-size: 0.84rem; }
-    .value { color: #fbbf24; font-weight: 600; }
-    .result-big { font-size: 1.3rem; font-weight: 700; color: #4ade80; margin-top: 5px; }
-    .ok { color: #4ade80; }
-    .warn { color: #fbbf24; }
-    .error { color: #f87171; }
-    .hidden { display: none; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
-    canvas { width: 100%; max-width: 100%; background: #0f172a; border-radius: 8px; border: 1px solid #334155; display: block; }
-    .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; font-size: 0.75rem; color: #94a3b8; }
-    .legend span { display: flex; align-items: center; gap: 4px; }
-    .dot { width: 9px; height: 9px; border-radius: 50%; }
-    .info { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; background: #334155; color: #94a3b8; font-size: 0.65rem; font-weight: 700; cursor: help; margin-left: 4px; vertical-align: middle; position: relative; }
-    .info:hover { background: #0ea5e9; color: white; }
-    .info .tooltip { visibility: hidden; width: 240px; background: #1e293b; color: #e2e8f0; text-align: left; border-radius: 8px; padding: 8px 10px; position: absolute; z-index: 20; bottom: 125%; left: 50%; margin-left: -120px; opacity: 0; transition: opacity 0.2s; font-size: 0.72rem; font-weight: 400; border: 1px solid #475569; line-height: 1.35; pointer-events: none; }
-    .info:hover .tooltip { visibility: visible; opacity: 1; }
-    table.val { width: 100%; border-collapse: collapse; font-size: 0.72rem; margin-top: 8px; }
-    table.val th, table.val td { border: 1px solid #334155; padding: 3px 5px; text-align: right; }
-    table.val th { background: #0f172a; color: #94a3b8; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Koeltechniek Categorie 1 – Calculator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#0f172a;color:#e2e8f0;line-height:1.5}
+.container{max-width:1000px;margin:0 auto;padding:16px}
+h1{text-align:center;color:#38bdf8;margin-bottom:4px;font-size:1.4rem}
+.subtitle{text-align:center;color:#94a3b8;margin-bottom:18px;font-size:0.88rem}
+.card{background:#1e293b;border-radius:12px;padding:18px;border:1px solid #334155;margin-bottom:14px}
+h2{color:#38bdf8;font-size:1.05rem;margin-bottom:12px}
+.menu-btn{display:block;width:100%;text-align:left;padding:10px 14px;margin-bottom:6px;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#e2e8f0;font-size:0.9rem;cursor:pointer}
+.menu-btn:hover{border-color:#0ea5e9;color:#38bdf8}
+label{display:block;margin-bottom:3px;font-size:0.8rem;color:#94a3b8}
+input,select{width:100%;padding:9px 11px;margin-bottom:11px;border-radius:8px;border:1px solid #475569;background:#0f172a;color:#e2e8f0;font-size:0.92rem}
+button.calc{width:100%;padding:12px;background:#0ea5e9;color:#fff;border:none;border-radius:8px;font-size:0.95rem;font-weight:600;cursor:pointer}
+button.back{background:transparent;border:1px solid #475569;color:#94a3b8;padding:9px;border-radius:8px;width:100%;margin-top:10px;cursor:pointer}
+.step{background:#0f172a;border-radius:8px;padding:11px 13px;margin-bottom:9px;border-left:4px solid #0ea5e9}
+.step h3{color:#38bdf8;font-size:0.88rem;margin-bottom:5px}
+.formula{font-family:monospace;background:#1e293b;padding:2px 5px;border-radius:4px;color:#4ade80;font-size:0.84rem}
+.value{color:#fbbf24;font-weight:600}
+.result-big{font-size:1.3rem;font-weight:700;color:#4ade80;margin-top:5px}
+.ok{color:#4ade80}.warn{color:#fbbf24}.error{color:#f87171}
+.hidden{display:none}
+canvas{width:100%;background:#0f172a;border-radius:8px;border:1px solid #334155;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px;font-size:0.75rem;color:#94a3b8}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>Koeltechniek – Categorie 1</h1>
-    <p class="subtitle">Kies een berekening → vul alleen basisgegevens in → alles wordt automatisch berekend</p>
-    <div class="card" id="menuCard">
-      <h2>Welke berekening wil je uitvoeren?</h2>
-      <button class="menu-btn" onclick="kies(1)">1. Oververhitting (ΔT<sub>over</sub>)</button>
-      <button class="menu-btn" onclick="kies(2)">2. Onderkoeling (ΔT<sub>onder</sub>)</button>
-      <button class="menu-btn" onclick="kies(3)">3. Specifiek koelvermogen (q₀)</button>
-      <button class="menu-btn" onclick="kies(4)">4. Specifiek condensorvermogen (q<sub>c</sub>)</button>
-      <button class="menu-btn" onclick="kies(5)">5. Specifieke compressorarbeid (w)</button>
-      <button class="menu-btn" onclick="kies(6)">6. Koelfactor (EER / COP<sub>R</sub>)</button>
-      <button class="menu-btn" onclick="kies(7)">7. Warmtefactor (COP<sub>H</sub>)</button>
-      <button class="menu-btn" onclick="kies(8)">8. Drukverhouding (π)</button>
-      <button class="menu-btn" onclick="kies(9)">9. Massastroom (ṁ)</button>
-      <button class="menu-btn" onclick="kies(10)">10. Totaal koelvermogen (Q<sub>verdamper</sub>)</button>
-      <button class="menu-btn" onclick="kies(11)">11. Totaal condensorvermogen (Q<sub>condensor</sub>)</button>
-      <button class="menu-btn" onclick="kies(12)" style="border-color:#0ea5e9;color:#38bdf8;">12. Complete set (volledige koelcyclus + p-h diagram) ★</button>
-      <button class="menu-btn" onclick="toonValidatie()" style="margin-top:10px;border-color:#a78bfa;color:#a78bfa;">▶ Validatie vs CoolProp (referentietests)</button>
-    </div>
-    <div class="card hidden" id="inputCard">
-      <h2 id="inputTitel">Gegevens</h2>
-      <div id="inputVelden"></div>
-      <button class="calc" onclick="uitvoeren()">Bereken</button>
-      <button class="back" onclick="terug()">← Terug naar menu</button>
-    </div>
-    <div class="card hidden" id="resultCard">
-      <h2>Stap-voor-stap uitwerking</h2>
-      <div id="resultaat"></div>
-      <div id="diagramWrap" class="hidden" style="margin-top:14px;">
-        <canvas id="phCanvas" width="860" height="480"></canvas>
-        <div class="legend">
-          <span><div class="dot" style="background:#38bdf8"></div> Verz. vloeistof</span>
-          <span><div class="dot" style="background:#f472b6"></div> Verz. damp</span>
-          <span><div class="dot" style="background:#4ade80"></div> Cyclus 1-2-3-4</span>
-          <span><div class="dot" style="background:#fbbf24"></div> Punten</span>
-        </div>
-      </div>
-      <button class="back" onclick="terug()">← Nieuwe berekening</button>
-    </div>
-  </div>
-  <script src="data_sat.js"></script>
-  <script src="data_ref.js"></script>
-  <script src="sh_all_sparse.js"></script>
-  <script src="sc_R134a.js"></script>
-  <script src="sc_R513A.js"></script>
-  <script src="sc_R410A.js"></script>
-  <script src="sc_R32.js"></script>
-  <script src="data_grids_loader.js"></script>
-  <script src="app_a.js"></script>
-  <script src="app_b.js"></script>
+<div class="container">
+<h1>Koeltechniek – Categorie 1</h1>
+<p class="subtitle">2D CoolProp property-engine · Kies berekening → vul basisgegevens in</p>
+<div class="card" id="menuCard">
+<h2>Welke berekening?</h2>
+<button class="menu-btn" onclick="kies(1)">1. Oververhitting</button>
+<button class="menu-btn" onclick="kies(2)">2. Onderkoeling</button>
+<button class="menu-btn" onclick="kies(3)">3. Specifiek koelvermogen q₀</button>
+<button class="menu-btn" onclick="kies(4)">4. Specifiek condensorvermogen qc</button>
+<button class="menu-btn" onclick="kies(5)">5. Specifieke compressorarbeid w</button>
+<button class="menu-btn" onclick="kies(6)">6. Koelfactor EER / COP_R</button>
+<button class="menu-btn" onclick="kies(7)">7. Warmtefactor COP_H</button>
+<button class="menu-btn" onclick="kies(8)">8. Drukverhouding π</button>
+<button class="menu-btn" onclick="kies(9)">9. Massastroom</button>
+<button class="menu-btn" onclick="kies(10)">10. Totaal koelvermogen</button>
+<button class="menu-btn" onclick="kies(11)">11. Totaal condensorvermogen</button>
+<button class="menu-btn" onclick="kies(12)" style="border-color:#0ea5e9;color:#38bdf8">12. Complete set ★</button>
+<button class="menu-btn" onclick="toonValidatie()" style="margin-top:10px;border-color:#a78bfa;color:#a78bfa">▶ Validatie vs CoolProp</button>
+</div>
+<div class="card hidden" id="inputCard">
+<h2 id="inputTitel">Gegevens</h2>
+<div id="inputVelden"></div>
+<button class="calc" onclick="uitvoeren()">Bereken</button>
+<button class="back" onclick="terug()">← Terug</button>
+</div>
+<div class="card hidden" id="resultCard">
+<h2>Stap-voor-stap</h2>
+<div id="resultaat"></div>
+<div id="diagramWrap" class="hidden" style="margin-top:14px">
+<canvas id="phCanvas" width="860" height="480"></canvas>
+<div class="legend">
+<span><span class="dot" style="background:#38bdf8"></span> Verz. vloeistof</span>
+<span><span class="dot" style="background:#f472b6"></span> Verz. damp</span>
+<span><span class="dot" style="background:#4ade80"></span> Cyclus</span>
+<span><span class="dot" style="background:#fbbf24"></span> Punten</span>
+</div>
+</div>
+<button class="back" onclick="terug()">← Nieuwe berekening</button>
+</div>
+</div>
+<script src="data_sat.js"></script>
+<script src="data_ref.js"></script>
+<script src="sh_sparse_a.js"></script>
+<script src="sh_sparse_b.js"></script>
+<script src="sc_R134a.js"></script>
+<script src="sc_R513A.js"></script>
+<script src="sc_R410A.js"></script>
+<script src="sc_R32.js"></script>
+<script src="data_grids_loader.js"></script>
+<script src="app_p1.js"></script>
+<script src="app_p2.js"></script>
 </body>
 </html>
